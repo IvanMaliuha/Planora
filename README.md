@@ -6,5 +6,5 @@
 - Марія Дженьдзюра — @githubusername — ПМ
 - Максим Корчинський — @githubusername
 - Іван Малюга — @IvanMaliuha
-- Артур  — @username2 
+- Артур Семцьо — @Arteran 
 
