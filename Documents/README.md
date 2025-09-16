@@ -1,3 +1,9 @@
+## Team
+- Марія Дзеньдзюра — @maya1379 — ПМ
+- Максим Корчинський — @MaksymKorchynskyi
+- Іван Малюга — @IvanMaliuha
+- Артур Семцьо — @Arteran 
+
 # Planora  
 
 **Plan Smarter, Learn Better**  
