@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "gPJrowSc7BU=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Planora\\Code\\PlanoraConsoleApp\\PlanoraConsoleApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\7115\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\7115\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\7115\\.nuget\\packages\\npgsql\\9.0.4\\npgsql.9.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}
