@@ -1,155 +1,112 @@
 -- ===========================================
---   CREATE DATABASE STRUCTURE FOR DESKTOP APP
+--   PLANORA DATABASE STRUCTURE (PostgreSQL)
 -- ===========================================
 
--- ===========================================
 -- 1. Users
--- ===========================================
 CREATE TABLE Users (
-    user_id SERIAL PRIMARY KEY,
-    full_name VARCHAR(100),
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100),
-    login VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) CHECK (role IN ('admin', 'teacher', 'student')) NOT NULL
+    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'teacher', 'student'))
 );
 
--- ===========================================
 -- 2. Administrator
--- ===========================================
 CREATE TABLE Administrator (
     user_id INT PRIMARY KEY,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
--- ===========================================
 -- 3. Teachers
--- ===========================================
 CREATE TABLE Teachers (
     user_id INT PRIMARY KEY,
-    department VARCHAR(100) NOT NULL,
+    faculty VARCHAR(100) NOT NULL,
     position VARCHAR(100),
-    email VARCHAR(100),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
--- ===========================================
--- 4. Groups
--- ===========================================
+-- 4. Groups (має бути перед Students!)
 CREATE TABLE Groups (
-    group_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    amount_students INT,
-    faculty VARCHAR(100)
+    faculty VARCHAR(100) NOT NULL,
+    student_count INT DEFAULT 0
 );
 
--- ===========================================
 -- 5. Students
--- ===========================================
 CREATE TABLE Students (
     user_id INT PRIMARY KEY,
     group_id INT,
     faculty VARCHAR(100) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES Groups(group_id) ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL
 );
 
--- ===========================================
 -- 6. Subjects
--- ===========================================
 CREATE TABLE Subjects (
-    subject_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    credits INT,
-    semester INT
+    type VARCHAR(50) NOT NULL,
+    requirements TEXT,
+    duration INT
 );
 
--- ===========================================
--- 7. Audience (Classrooms)
--- ===========================================
-CREATE TABLE Audience (
-    audience_id SERIAL PRIMARY KEY,
+-- 7. Classrooms
+CREATE TABLE Classrooms (
+    id SERIAL PRIMARY KEY,
     number VARCHAR(50) NOT NULL,
-    corps VARCHAR(50) NOT NULL,
-    capacity INT,
-    has_projector BOOLEAN DEFAULT FALSE,
-    has_computers BOOLEAN DEFAULT FALSE
+    building VARCHAR(50) NOT NULL,
+    capacity INT NOT NULL,
+    faculty VARCHAR(100) NOT NULL,
+    has_computers BOOLEAN DEFAULT FALSE,
+    has_projector BOOLEAN DEFAULT FALSE
 );
 
--- ===========================================
 -- 8. Schedule
--- ===========================================
 CREATE TABLE Schedule (
-    schedule_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
     subject_id INT NOT NULL,
-    teacher_id INT NOT NULL,
     group_id INT NOT NULL,
-    audience_id INT NOT NULL,
-    day VARCHAR(20) NOT NULL,
+    classroom_id INT NOT NULL,
+    day_of_week INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    lesson_type VARCHAR(50),
-    FOREIGN KEY (subject_id) REFERENCES Subjects(subject_id) ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES Teachers(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES Groups(group_id) ON DELETE CASCADE,
-    FOREIGN KEY (audience_id) REFERENCES Audience(audience_id) ON DELETE CASCADE
+    week_type VARCHAR(10) DEFAULT 'both',
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (classroom_id) REFERENCES Classrooms(id) ON DELETE CASCADE
 );
 
--- ===========================================
--- 9. RoomSearch
--- ===========================================
-CREATE TABLE RoomSearch (
-    search_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    corps VARCHAR(50),
-    type VARCHAR(50),
-    capacity INT,
-    has_computers BOOLEAN DEFAULT FALSE,
-    has_projector BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
-);
-
--- ===========================================
--- 10. TeachingAssignment
--- ===========================================
+-- 9. TeachingAssignment
 CREATE TABLE TeachingAssignment (
     assignment_id SERIAL PRIMARY KEY,
-    teacher_id INT NOT NULL,
+    user_id INT NOT NULL,
     subject_id INT NOT NULL,
-    group_id INT NOT NULL,
     hours INT,
-    requirements TEXT,
-    FOREIGN KEY (teacher_id) REFERENCES Teachers(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES Subjects(subject_id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES Groups(group_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Teachers(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE
 );
 
--- ===========================================
--- 11. GroupDisciplineList (для розширення)
--- ===========================================
+-- 10. GroupDisciplineList
 CREATE TABLE GroupDisciplineList (
     list_id SERIAL PRIMARY KEY,
     group_id INT NOT NULL,
     subject_id INT NOT NULL,
-    FOREIGN KEY (group_id) REFERENCES Groups(group_id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES Subjects(subject_id) ON DELETE CASCADE
+    hours INT,
+    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE
 );
 
--- ===========================================
--- 12. Workload
--- ===========================================
+-- 11. Workload
 CREATE TABLE Workload (
-    workload_id SERIAL PRIMARY KEY,
-    group_id INT NOT NULL,
-    teacher_id INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
     subject_id INT NOT NULL,
-    audience_id INT NOT NULL,
-    day VARCHAR(20),
-    start_time TIME,
-    end_time TIME,
-    hours_needed INT,
-    FOREIGN KEY (group_id) REFERENCES Groups(group_id) ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES Teachers(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES Subjects(subject_id) ON DELETE CASCADE,
-    FOREIGN KEY (audience_id) REFERENCES Audience(audience_id) ON DELETE CASCADE
+    group_id INT NOT NULL,
+    duration INT,
+    FOREIGN KEY (user_id) REFERENCES Teachers(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE CASCADE
 );

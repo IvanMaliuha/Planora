@@ -18,36 +18,34 @@ class Program
     static void InsertTestData(NpgsqlConnection connection)
     {
         InsertUsers(connection);
-        InsertAdministrators(connection);
         InsertGroups(connection);
         InsertTeachers(connection);
+        InsertAdministrator(connection);
         InsertStudents(connection);
         InsertSubjects(connection);
-        InsertAudience(connection);
-        InsertSchedule(connection);
-        InsertRoomSearch(connection);
+        InsertClassrooms(connection);
         InsertTeachingAssignment(connection);
         InsertGroupDisciplineList(connection);
         InsertWorkload(connection);
+        InsertSchedule(connection);
     }
     
     static void InsertUsers(NpgsqlConnection connection)
     {
-        var users = new List<(string, string, string, string, string)>();
-        for (int i = 1; i <= 35; i++)
+        var users = new List<(string, string, string, string)>();
+        for (int i = 1; i <= 50; i++)
         {
             string role = i switch
             {
                 1 => "admin",
-                <= 10 => "teacher",
+                <= 15 => "teacher",
                 _ => "student"
             };
             
             users.Add((
                 $"User {i}",
                 $"user{i}@university.com",
-                $"user{i}",
-                $"password{i}",
+                $"password_hash_{i}",
                 role
             ));
         }
@@ -58,21 +56,20 @@ class Program
         foreach (var user in users)
         {
             cmd.CommandText = @"
-                INSERT INTO Users (full_name, email, login, password_hash, role) 
-                VALUES (@name, @email, @login, @password, @role)";
+                INSERT INTO Users (full_name, email, password_hash, role) 
+                VALUES (@name, @email, @password, @role)";
             
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("name", user.Item1);
             cmd.Parameters.AddWithValue("email", user.Item2);
-            cmd.Parameters.AddWithValue("login", user.Item3);
-            cmd.Parameters.AddWithValue("password", user.Item4);
-            cmd.Parameters.AddWithValue("role", user.Item5);
+            cmd.Parameters.AddWithValue("password", user.Item3);
+            cmd.Parameters.AddWithValue("role", user.Item4);
             
             cmd.ExecuteNonQuery();
         }
     }
     
-    static void InsertAdministrators(NpgsqlConnection connection)
+    static void InsertAdministrator(NpgsqlConnection connection)
     {
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
@@ -83,13 +80,13 @@ class Program
     
     static void InsertGroups(NpgsqlConnection connection)
     {
-        var groups = new List<(string, int, string)>();
-        for (int i = 1; i <= 35; i++)
+        var groups = new List<(string, string, int)>();
+        for (int i = 1; i <= 30; i++)
         {
             groups.Add((
-                $"Group {((i-1) % 7) + 1}-{(char)('A' + (i-1) / 7)}",
-                25 + (i % 10),
-                $"Faculty {((i-1) % 5) + 1}"
+                $"Group {((i-1) % 10) + 1}-{(char)('A' + (i-1) / 10)}",
+                $"Faculty {((i-1) % 5) + 1}",
+                20 + (i * 2)
             ));
         }
         
@@ -99,13 +96,13 @@ class Program
         foreach (var group in groups)
         {
             cmd.CommandText = @"
-                INSERT INTO Groups (name, amount_students, faculty) 
-                VALUES (@name, @amount, @faculty)";
+                INSERT INTO Groups (name, faculty, student_count) 
+                VALUES (@name, @faculty, @student_count)";
             
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("name", group.Item1);
-            cmd.Parameters.AddWithValue("amount", group.Item2);
-            cmd.Parameters.AddWithValue("faculty", group.Item3);
+            cmd.Parameters.AddWithValue("faculty", group.Item2);
+            cmd.Parameters.AddWithValue("student_count", group.Item3);
             
             cmd.ExecuteNonQuery();
         }
@@ -113,23 +110,22 @@ class Program
     
     static void InsertTeachers(NpgsqlConnection connection)
     {
-        var departments = new[] { "Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry" };
-        var positions = new[] { "Professor", "Associate Professor", "Assistant Professor", "Lecturer" };
+        var faculties = new[] { "Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry", "Biology", "Economics" };
+        var positions = new[] { "Professor", "Associate Professor", "Assistant Professor", "Lecturer", "Senior Lecturer" };
         
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 2; i <= 10; i++)
+        for (int i = 2; i <= 15; i++)
         {
             cmd.CommandText = @"
-                INSERT INTO Teachers (user_id, department, position, email) 
-                VALUES (@user_id, @department, @position, @email)";
+                INSERT INTO Teachers (user_id, faculty, position) 
+                VALUES (@user_id, @faculty, @position)";
             
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("user_id", i);
-            cmd.Parameters.AddWithValue("department", departments[(i-2) % departments.Length]);
+            cmd.Parameters.AddWithValue("faculty", faculties[(i-2) % faculties.Length]);
             cmd.Parameters.AddWithValue("position", positions[(i-2) % positions.Length]);
-            cmd.Parameters.AddWithValue("email", $"teacher{i}@university.com");
             
             cmd.ExecuteNonQuery();
         }
@@ -137,10 +133,12 @@ class Program
     
     static void InsertStudents(NpgsqlConnection connection)
     {
+        var faculties = new[] { "Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry", "Biology", "Economics" };
+        
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 11; i <= 35; i++)
+        for (int i = 16; i <= 50; i++)
         {
             cmd.CommandText = @"
                 INSERT INTO Students (user_id, group_id, faculty) 
@@ -148,8 +146,8 @@ class Program
             
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("user_id", i);
-            cmd.Parameters.AddWithValue("group_id", (i - 10));
-            cmd.Parameters.AddWithValue("faculty", $"Faculty {((i-11) % 5) + 1}");
+            cmd.Parameters.AddWithValue("group_id", ((i - 16) % 30) + 1);
+            cmd.Parameters.AddWithValue("faculty", faculties[(i-16) % faculties.Length]);
             
             cmd.ExecuteNonQuery();
         }
@@ -157,20 +155,25 @@ class Program
     
     static void InsertSubjects(NpgsqlConnection connection)
     {
-        var subjects = new List<(string, int, int)>();
+        var subjects = new List<(string, string, string, int)>();
         var subjectNames = new[] 
         {
             "Mathematics", "Physics", "Programming", "Algorithms", "Database Systems",
             "Web Development", "Operating Systems", "Computer Networks", "Software Engineering",
-            "Data Structures", "Artificial Intelligence", "Machine Learning", "Cyber Security"
+            "Data Structures", "Artificial Intelligence", "Machine Learning", "Cyber Security",
+            "Data Science", "Computer Graphics", "Mobile Development", "Cloud Computing",
+            "Big Data", "Internet of Things", "Blockchain Technology"
         };
         
-        for (int i = 0; i < 35; i++)
+        var subjectTypes = new[] { "Lecture", "Practice", "Laboratory" };
+        
+        for (int i = 0; i < 30; i++)
         {
             subjects.Add((
                 $"{subjectNames[i % subjectNames.Length]} {(i / subjectNames.Length) + 1}",
-                3 + (i % 4),
-                1 + (i % 2)
+                subjectTypes[i % subjectTypes.Length],
+                $"Requirements for {subjectNames[i % subjectNames.Length]} {(i / subjectNames.Length) + 1}",
+                30 + (i * 3)
             ));
         }
         
@@ -180,35 +183,37 @@ class Program
         foreach (var subject in subjects)
         {
             cmd.CommandText = @"
-                INSERT INTO Subjects (name, credits, semester) 
-                VALUES (@name, @credits, @semester)";
+                INSERT INTO Subjects (name, type, requirements, duration) 
+                VALUES (@name, @type, @requirements, @duration)";
             
             cmd.Parameters.Clear();
             cmd.Parameters.AddWithValue("name", subject.Item1);
-            cmd.Parameters.AddWithValue("credits", subject.Item2);
-            cmd.Parameters.AddWithValue("semester", subject.Item3);
+            cmd.Parameters.AddWithValue("type", subject.Item2);
+            cmd.Parameters.AddWithValue("requirements", subject.Item3);
+            cmd.Parameters.AddWithValue("duration", subject.Item4);
             
             cmd.ExecuteNonQuery();
         }
     }
     
-    static void InsertAudience(NpgsqlConnection connection)
+    static void InsertClassrooms(NpgsqlConnection connection)
     {
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 1; i <= 35; i++)
+        for (int i = 1; i <= 30; i++)
         {
             cmd.CommandText = @"
-                INSERT INTO Audience (number, corps, capacity, has_projector, has_computers) 
-                VALUES (@number, @corps, @capacity, @projector, @computers)";
+                INSERT INTO Classrooms (number, building, capacity, faculty, has_computers, has_projector) 
+                VALUES (@number, @building, @capacity, @faculty, @computers, @projector)";
             
             cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("number", $"{(i % 10) + 1}{(char)('A' + (i / 10))}");
-            cmd.Parameters.AddWithValue("corps", $"Corps {(i % 5) + 1}");
-            cmd.Parameters.AddWithValue("capacity", 20 + (i * 2));
-            cmd.Parameters.AddWithValue("projector", i % 3 == 0);
+            cmd.Parameters.AddWithValue("number", $"{100 + i}");
+            cmd.Parameters.AddWithValue("building", $"Building {(i % 6) + 1}");
+            cmd.Parameters.AddWithValue("capacity", 20 + (i * 4));
+            cmd.Parameters.AddWithValue("faculty", $"Faculty {(i % 5) + 1}");
             cmd.Parameters.AddWithValue("computers", i % 2 == 0);
+            cmd.Parameters.AddWithValue("projector", i % 3 == 0 || i % 5 == 0);
             
             cmd.ExecuteNonQuery();
         }
@@ -216,49 +221,26 @@ class Program
     
     static void InsertSchedule(NpgsqlConnection connection)
     {
-        var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
-        
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 1; i <= 35; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Schedule (subject_id, teacher_id, group_id, audience_id, day, start_time, end_time, lesson_type) 
-                VALUES (@subject_id, @teacher_id, @group_id, @audience_id, @day, @start_time, @end_time, @type)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("subject_id", i);
-            cmd.Parameters.AddWithValue("teacher_id", 2 + ((i-1) % 9));
-            cmd.Parameters.AddWithValue("group_id", i);
-            cmd.Parameters.AddWithValue("audience_id", i);
-            cmd.Parameters.AddWithValue("day", days[i % days.Length]);
-            cmd.Parameters.AddWithValue("start_time", TimeSpan.FromHours(8 + (i % 6)));
-            cmd.Parameters.AddWithValue("end_time", TimeSpan.FromHours(10 + (i % 6)));
-            cmd.Parameters.AddWithValue("type", i % 3 == 0 ? "Lecture" : "Practice");
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertRoomSearch(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
+        var weekTypes = new[] { "both", "num", "denom" };
         
-        for (int i = 1; i <= 35; i++)
+        for (int i = 1; i <= 30; i++)
         {
             cmd.CommandText = @"
-                INSERT INTO RoomSearch (user_id, corps, type, capacity, has_computers, has_projector) 
-                VALUES (@user_id, @corps, @type, @capacity, @computers, @projector)";
+                INSERT INTO Schedule (user_id, subject_id, group_id, classroom_id, day_of_week, start_time, end_time, week_type) 
+                VALUES (@user_id, @subject_id, @group_id, @classroom_id, @day_of_week, @start_time, @end_time, @week_type)";
             
             cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 34));
-            cmd.Parameters.AddWithValue("corps", $"Corps {(i % 5) + 1}");
-            cmd.Parameters.AddWithValue("type", i % 2 == 0 ? "Lecture" : "Laboratory");
-            cmd.Parameters.AddWithValue("capacity", 25 + (i * 3));
-            cmd.Parameters.AddWithValue("computers", i % 3 == 0);
-            cmd.Parameters.AddWithValue("projector", i % 2 == 0);
+            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 14));
+            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("group_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("classroom_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("day_of_week", (i % 5) + 1);
+            cmd.Parameters.AddWithValue("start_time", TimeSpan.FromHours(8 + ((i-1) % 8)));
+            cmd.Parameters.AddWithValue("end_time", TimeSpan.FromHours(10 + ((i-1) % 8)));
+            cmd.Parameters.AddWithValue("week_type", weekTypes[i % weekTypes.Length]);
             
             cmd.ExecuteNonQuery();
         }
@@ -269,18 +251,16 @@ class Program
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 1; i <= 35; i++)
+        for (int i = 1; i <= 30; i++)
         {
             cmd.CommandText = @"
-                INSERT INTO TeachingAssignment (teacher_id, subject_id, group_id, hours, requirements) 
-                VALUES (@teacher_id, @subject_id, @group_id, @hours, @requirements)";
+                INSERT INTO TeachingAssignment (user_id, subject_id, hours) 
+                VALUES (@user_id, @subject_id, @hours)";
             
             cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("teacher_id", 2 + ((i-1) % 9));
-            cmd.Parameters.AddWithValue("subject_id", i);
-            cmd.Parameters.AddWithValue("group_id", i);
-            cmd.Parameters.AddWithValue("hours", 30 + (i % 20));
-            cmd.Parameters.AddWithValue("requirements", $"Requirements for assignment {i}");
+            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 14));
+            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("hours", 25 + (i * 2));
             
             cmd.ExecuteNonQuery();
         }
@@ -291,15 +271,16 @@ class Program
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 1; i <= 35; i++)
+        for (int i = 1; i <= 30; i++)
         {
             cmd.CommandText = @"
-                INSERT INTO GroupDisciplineList (group_id, subject_id) 
-                VALUES (@group_id, @subject_id)";
+                INSERT INTO GroupDisciplineList (group_id, subject_id, hours) 
+                VALUES (@group_id, @subject_id, @hours)";
             
             cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("group_id", i);
-            cmd.Parameters.AddWithValue("subject_id", i);
+            cmd.Parameters.AddWithValue("group_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("hours", 40 + (i * 3));
             
             cmd.ExecuteNonQuery();
         }
@@ -307,26 +288,20 @@ class Program
     
     static void InsertWorkload(NpgsqlConnection connection)
     {
-        var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
-        
         using var cmd = new NpgsqlCommand();
         cmd.Connection = connection;
         
-        for (int i = 1; i <= 35; i++)
+        for (int i = 1; i <= 30; i++)
         {
             cmd.CommandText = @"
-                INSERT INTO Workload (group_id, teacher_id, subject_id, audience_id, day, start_time, end_time, hours_needed) 
-                VALUES (@group_id, @teacher_id, @subject_id, @audience_id, @day, @start_time, @end_time, @hours)";
+                INSERT INTO Workload (user_id, subject_id, group_id, duration) 
+                VALUES (@user_id, @subject_id, @group_id, @duration)";
             
             cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("group_id", i);
-            cmd.Parameters.AddWithValue("teacher_id", 2 + ((i-1) % 9));
-            cmd.Parameters.AddWithValue("subject_id", i);
-            cmd.Parameters.AddWithValue("audience_id", i);
-            cmd.Parameters.AddWithValue("day", days[i % days.Length]);
-            cmd.Parameters.AddWithValue("start_time", TimeSpan.FromHours(9 + (i % 5)));
-            cmd.Parameters.AddWithValue("end_time", TimeSpan.FromHours(11 + (i % 5)));
-            cmd.Parameters.AddWithValue("hours", 120 + (i * 2));
+            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 14));
+            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("group_id", ((i-1) % 30) + 1);
+            cmd.Parameters.AddWithValue("duration", 50 + (i * 4));
             
             cmd.ExecuteNonQuery();
         }
@@ -337,7 +312,7 @@ class Program
         var tables = new[] 
         {
             "Users", "Administrator", "Teachers", "Groups", "Students",
-            "Subjects", "Audience", "Schedule", "RoomSearch", "TeachingAssignment",
+            "Subjects", "Classrooms", "Schedule", "TeachingAssignment",
             "GroupDisciplineList", "Workload"
         };
         
@@ -345,8 +320,12 @@ class Program
         {
             Console.WriteLine($"\n=== {table} ===");
             
-            using var cmd = new NpgsqlCommand($"SELECT * FROM {table} LIMIT 35", connection);
-            using var reader = cmd.ExecuteReader();
+            using var cmd = new NpgsqlCommand($"SELECT COUNT(*) FROM {table}", connection);
+            var count = cmd.ExecuteScalar();
+            Console.WriteLine($"Total records: {count}");
+            
+            using var cmdSelect = new NpgsqlCommand($"SELECT * FROM {table} LIMIT 10", connection);
+            using var reader = cmdSelect.ExecuteReader();
             
             for (int i = 0; i < reader.FieldCount; i++)
             {
