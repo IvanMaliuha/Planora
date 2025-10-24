@@ -11,4 +11,8 @@
     <PackageReference Include="Npgsql" Version="9.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Planora.DAL\Planora.DAL.csproj" />
+  </ItemGroup>
+
 </Project>
