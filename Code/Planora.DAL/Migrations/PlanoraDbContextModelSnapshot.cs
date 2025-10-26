@@ -72,6 +72,10 @@ namespace Planora.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("StudentCount")
                         .HasColumnType("integer");
 

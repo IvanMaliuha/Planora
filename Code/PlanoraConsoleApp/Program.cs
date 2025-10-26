@@ -1,350 +1,425 @@
-﻿using System;
-using Npgsql;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Planora.DAL;
+using Planora.BLL.Handlers.Commands.Teachers;
+using Planora.BLL.Handlers.Commands.Groups;
+using Planora.BLL.Handlers.Commands.Students;
+using Planora.BLL.Handlers.Commands.Subjects;
+using Planora.BLL.Handlers.Commands.Classrooms;
+using Planora.BLL.Handlers.Commands.TeachingAssignments;
+using Planora.BLL.Handlers.Commands.GroupDisciplineLists;
+using Planora.BLL.Handlers.Commands.Workload;
+using Planora.BLL.Services;
+using MediatR;
+using Planora.BLL.DTOs;
+using System.Threading.Tasks;
+using System.IO;
+using PlanoraConsoleApp; 
+using System;
+using System.Linq;
+using CsvHelper;
+using System.Globalization;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
+using Planora.BLL.DTOs.Queries; 
+using Planora.BLL.Handlers.Queries.Classrooms;
+using Planora.BLL.Handlers.Queries.Teachers; // 👈 НОВИЙ USING
 
-class Program
+// --- КОНФІГУРАЦІЯ ХОСТУ ---
+
+var host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices((context, services) =>
+    {
+        var connectionString = "Host=localhost;Port=5432;Database=Planora_db;Username=postgres;Password=2025";
+
+        services.AddDbContext<PlanoraDbContext>(options =>
+            options.UseNpgsql(connectionString)
+        );
+
+        // Реєстрація MediatR з BLL асемблеї (автоматично знаходить команди та запити)
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AddTeacherCommand).Assembly));
+
+        // Реєстрація сервісів
+        services.AddScoped<IWorkloadService, WorkloadService>();
+        
+        // Реєструємо ScheduleGenerator
+        services.AddScoped<ScheduleGenerator>(); 
+        services.AddTransient<ConsoleAppRunner>();
+    })
+    .Build();
+
+await host.StartAsync();
+var runner = host.Services.GetRequiredService<ConsoleAppRunner>(); 
+await runner.RunAsync();
+
+// --- RUNNER КОНСОЛЬНОГО ЗАСТОСУНКУ ---
+
+internal class ConsoleAppRunner
 {
-    static void Main()
+    private readonly IMediator _mediator;
+    private readonly ScheduleGenerator _generator; 
+    private readonly PlanoraDbContext _context;
+    private readonly IWorkloadService _workloadService;
+
+    public ConsoleAppRunner(IMediator mediator, PlanoraDbContext context, IWorkloadService workloadService, ScheduleGenerator generator)
     {
-        var connectionString = "Host=localhost;Port=5432;Database=planora_db;Username=postgres;Password=maksimdata1234";
-        
-        using var connection = new NpgsqlConnection(connectionString);
-        connection.Open();
-        
-        InsertTestData(connection);
-        DisplayAllData(connection);
+        _mediator = mediator;
+        _context = context;
+        _workloadService = workloadService;
+        _generator = generator;
     }
-    
-    static void InsertTestData(NpgsqlConnection connection)
+
+
+    public async Task RunAsync()
     {
-        InsertUsers(connection);
-        InsertGroups(connection);
-        InsertTeachers(connection);
-        InsertAdministrator(connection);
-        InsertStudents(connection);
-        InsertSubjects(connection);
-        InsertClassrooms(connection);
-        InsertTeachingAssignment(connection);
-        InsertGroupDisciplineList(connection);
-        InsertWorkload(connection);
-        InsertSchedule(connection);
-    }
-    
-    static void InsertUsers(NpgsqlConnection connection)
-    {
-        var users = new List<(string, string, string, string)>();
-        for (int i = 1; i <= 50; i++)
+        Console.WriteLine("--- Консольний застосунок Planora: Режим Адміністратора ---");
+
+        while (true)
         {
-            string role = i switch
+            Console.WriteLine("\nОберіть операцію:");
+            Console.WriteLine("1. Додати Викладача");
+            Console.WriteLine("2. Додати Групу");
+            Console.WriteLine("3. Додати Студента");
+            Console.WriteLine("4. Додати Предмет");
+            Console.WriteLine("5. Додати Аудиторію");
+            Console.WriteLine("6. Додати Призначення Викладання");
+            Console.WriteLine("7. Додати Список Дисциплін Групи");
+            Console.WriteLine("8. Згенерувати Workload (CSV)");
+            Console.WriteLine("9. Згенерувати розклад з Workload.csv");
+            Console.WriteLine("10. ЗНАЙТИ ВІЛЬНУ АУДИТОРІЮ"); 
+            Console.WriteLine("11. ЗНАЙТИ ВИКЛАДАЧА"); // 👈 НОВА ОПЦІЯ
+            Console.WriteLine("0. Вихід");
+            Console.Write("Ваш вибір: ");
+
+            var choice = Console.ReadLine();
+
+            switch (choice)
             {
-                1 => "admin",
-                <= 15 => "teacher",
-                _ => "student"
-            };
-            
-            users.Add((
-                $"User {i}",
-                $"user{i}@university.com",
-                $"password_hash_{i}",
-                role
-            ));
-        }
-        
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        foreach (var user in users)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Users (full_name, email, password_hash, role) 
-                VALUES (@name, @email, @password, @role)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("name", user.Item1);
-            cmd.Parameters.AddWithValue("email", user.Item2);
-            cmd.Parameters.AddWithValue("password", user.Item3);
-            cmd.Parameters.AddWithValue("role", user.Item4);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertAdministrator(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        cmd.CommandText = "INSERT INTO Administrator (user_id) VALUES (1)";
-        cmd.ExecuteNonQuery();
-    }
-    
-    static void InsertGroups(NpgsqlConnection connection)
-    {
-        var groups = new List<(string, string, int)>();
-        for (int i = 1; i <= 30; i++)
-        {
-            groups.Add((
-                $"Group {((i-1) % 10) + 1}-{(char)('A' + (i-1) / 10)}",
-                $"Faculty {((i-1) % 5) + 1}",
-                20 + (i * 2)
-            ));
-        }
-        
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        foreach (var group in groups)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Groups (name, faculty, student_count) 
-                VALUES (@name, @faculty, @student_count)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("name", group.Item1);
-            cmd.Parameters.AddWithValue("faculty", group.Item2);
-            cmd.Parameters.AddWithValue("student_count", group.Item3);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertTeachers(NpgsqlConnection connection)
-    {
-        var faculties = new[] { "Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry", "Biology", "Economics" };
-        var positions = new[] { "Professor", "Associate Professor", "Assistant Professor", "Lecturer", "Senior Lecturer" };
-        
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        for (int i = 2; i <= 15; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Teachers (user_id, faculty, position) 
-                VALUES (@user_id, @faculty, @position)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("user_id", i);
-            cmd.Parameters.AddWithValue("faculty", faculties[(i-2) % faculties.Length]);
-            cmd.Parameters.AddWithValue("position", positions[(i-2) % positions.Length]);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertStudents(NpgsqlConnection connection)
-    {
-        var faculties = new[] { "Computer Science", "Mathematics", "Physics", "Engineering", "Chemistry", "Biology", "Economics" };
-        
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        for (int i = 16; i <= 50; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Students (user_id, group_id, faculty) 
-                VALUES (@user_id, @group_id, @faculty)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("user_id", i);
-            cmd.Parameters.AddWithValue("group_id", ((i - 16) % 30) + 1);
-            cmd.Parameters.AddWithValue("faculty", faculties[(i-16) % faculties.Length]);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertSubjects(NpgsqlConnection connection)
-    {
-        var subjects = new List<(string, string, string, int)>();
-        var subjectNames = new[] 
-        {
-            "Mathematics", "Physics", "Programming", "Algorithms", "Database Systems",
-            "Web Development", "Operating Systems", "Computer Networks", "Software Engineering",
-            "Data Structures", "Artificial Intelligence", "Machine Learning", "Cyber Security",
-            "Data Science", "Computer Graphics", "Mobile Development", "Cloud Computing",
-            "Big Data", "Internet of Things", "Blockchain Technology"
-        };
-        
-        var subjectTypes = new[] { "Lecture", "Practice", "Laboratory" };
-        
-        for (int i = 0; i < 30; i++)
-        {
-            subjects.Add((
-                $"{subjectNames[i % subjectNames.Length]} {(i / subjectNames.Length) + 1}",
-                subjectTypes[i % subjectTypes.Length],
-                $"Requirements for {subjectNames[i % subjectNames.Length]} {(i / subjectNames.Length) + 1}",
-                30 + (i * 3)
-            ));
-        }
-        
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        foreach (var subject in subjects)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Subjects (name, type, requirements, duration) 
-                VALUES (@name, @type, @requirements, @duration)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("name", subject.Item1);
-            cmd.Parameters.AddWithValue("type", subject.Item2);
-            cmd.Parameters.AddWithValue("requirements", subject.Item3);
-            cmd.Parameters.AddWithValue("duration", subject.Item4);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertClassrooms(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        for (int i = 1; i <= 30; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Classrooms (number, building, capacity, faculty, has_computers, has_projector) 
-                VALUES (@number, @building, @capacity, @faculty, @computers, @projector)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("number", $"{100 + i}");
-            cmd.Parameters.AddWithValue("building", $"Building {(i % 6) + 1}");
-            cmd.Parameters.AddWithValue("capacity", 20 + (i * 4));
-            cmd.Parameters.AddWithValue("faculty", $"Faculty {(i % 5) + 1}");
-            cmd.Parameters.AddWithValue("computers", i % 2 == 0);
-            cmd.Parameters.AddWithValue("projector", i % 3 == 0 || i % 5 == 0);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertSchedule(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        var weekTypes = new[] { "both", "num", "denom" };
-        
-        for (int i = 1; i <= 30; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Schedule (user_id, subject_id, group_id, classroom_id, day_of_week, start_time, end_time, week_type) 
-                VALUES (@user_id, @subject_id, @group_id, @classroom_id, @day_of_week, @start_time, @end_time, @week_type)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 14));
-            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("group_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("classroom_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("day_of_week", (i % 5) + 1);
-            cmd.Parameters.AddWithValue("start_time", TimeSpan.FromHours(8 + ((i-1) % 8)));
-            cmd.Parameters.AddWithValue("end_time", TimeSpan.FromHours(10 + ((i-1) % 8)));
-            cmd.Parameters.AddWithValue("week_type", weekTypes[i % weekTypes.Length]);
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertTeachingAssignment(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        for (int i = 1; i <= 30; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO TeachingAssignment (user_id, subject_id, hours) 
-                VALUES (@user_id, @subject_id, @hours)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 14));
-            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("hours", 25 + (i * 2));
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertGroupDisciplineList(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        for (int i = 1; i <= 30; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO GroupDisciplineList (group_id, subject_id, hours) 
-                VALUES (@group_id, @subject_id, @hours)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("group_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("hours", 40 + (i * 3));
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void InsertWorkload(NpgsqlConnection connection)
-    {
-        using var cmd = new NpgsqlCommand();
-        cmd.Connection = connection;
-        
-        for (int i = 1; i <= 30; i++)
-        {
-            cmd.CommandText = @"
-                INSERT INTO Workload (user_id, subject_id, group_id, duration) 
-                VALUES (@user_id, @subject_id, @group_id, @duration)";
-            
-            cmd.Parameters.Clear();
-            cmd.Parameters.AddWithValue("user_id", 2 + ((i-1) % 14));
-            cmd.Parameters.AddWithValue("subject_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("group_id", ((i-1) % 30) + 1);
-            cmd.Parameters.AddWithValue("duration", 50 + (i * 4));
-            
-            cmd.ExecuteNonQuery();
-        }
-    }
-    
-    static void DisplayAllData(NpgsqlConnection connection)
-    {
-        var tables = new[] 
-        {
-            "Users", "Administrator", "Teachers", "Groups", "Students",
-            "Subjects", "Classrooms", "Schedule", "TeachingAssignment",
-            "GroupDisciplineList", "Workload"
-        };
-        
-        foreach (var table in tables)
-        {
-            Console.WriteLine($"\n=== {table} ===");
-            
-            using var cmd = new NpgsqlCommand($"SELECT COUNT(*) FROM {table}", connection);
-            var count = cmd.ExecuteScalar();
-            Console.WriteLine($"Total records: {count}");
-            
-            using var cmdSelect = new NpgsqlCommand($"SELECT * FROM {table} LIMIT 10", connection);
-            using var reader = cmdSelect.ExecuteReader();
-            
-            for (int i = 0; i < reader.FieldCount; i++)
-            {
-                Console.Write($"{reader.GetName(i),-20}");
+                case "1":
+                    await AddTeacherInteractiveAsync();
+                    break;
+                case "2":
+                    await AddGroupInteractiveAsync();
+                    break;
+                case "3":
+                    await AddStudentInteractiveAsync();
+                    break;
+                case "4":
+                    await AddSubjectInteractiveAsync();
+                    break;
+                case "5":
+                    await AddClassroomInteractiveAsync();
+                    break;
+                case "6":
+                    await AddTeachingAssignmentInteractiveAsync();
+                    break;
+                case "7":
+                    await AddGroupDisciplineListInteractiveAsync();
+                    break;
+                case "8":
+                    await GenerateWorkloadInteractiveAsync();
+                    break;
+                case "9":
+                    await GenerateScheduleFromCsv(); 
+                    break;
+                case "10":
+                    await FindFreeClassroomInteractiveAsync(); 
+                    break;
+                case "11": // 👈 НОВИЙ КЕЙС
+                    await FindTeacherLocationInteractiveAsync();
+                    break;
+
+                case "0":
+                    Console.WriteLine("👋 Вихід із програми.");
+                    return;
+                default:
+                    Console.WriteLine("❌ Невірний вибір. Спробуйте ще раз.");
+                    break;
             }
-            Console.WriteLine();
-            Console.WriteLine(new string('-', reader.FieldCount * 20));
+        }
+    }
+
+    // --- Методи для додавання (ЗБЕРЕЖЕНІ) ---
+    private async Task AddTeacherInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ДОДАВАННЯ ВИКЛАДАЧА ---");
+        Console.Write("ПІБ: "); var fullName = Console.ReadLine();
+        Console.Write("Email: "); var email = Console.ReadLine();
+        Console.Write("Факультет: "); var faculty = Console.ReadLine();
+        Console.Write("Посада: "); var position = Console.ReadLine();
+
+        var command = new AddTeacherCommand(new AddTeacherDto { FullName = fullName, Email = email, Faculty = faculty, Position = position });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Викладача додано!" : "❌ Не вдалося додати викладача (Email вже існує).");
+    }
+
+    private async Task AddGroupInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ДОДАВАННЯ ГРУПИ ---");
+        Console.Write("Назва групи: "); var name = Console.ReadLine();
+        Console.Write("Факультет: "); var faculty = Console.ReadLine();
+        Console.Write("Кількість студентів: "); int.TryParse(Console.ReadLine(), out int count);
+
+        var command = new AddGroupCommand(new AddGroupDto { Name = name, Faculty = faculty, StudentCount = count });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Групу додано!" : "❌ Така група вже існує.");
+    }
+
+    private async Task AddStudentInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ДОДАВАННЯ СТУДЕНТА ---");
+        Console.Write("ПІБ: "); var fullName = Console.ReadLine();
+        Console.Write("Email: "); var email = Console.ReadLine();
+        Console.Write("Факультет: "); var faculty = Console.ReadLine();
+        Console.Write("Назва групи: "); var groupName = Console.ReadLine();
+
+        var command = new AddStudentCommand(new AddStudentDto { FullName = fullName, Email = email, Faculty = faculty, GroupName = groupName });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Студента додано!" : "❌ Не вдалося додати (Email або група некоректні).");
+    }
+
+    private async Task AddSubjectInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ДОДАВАННЯ ПРЕДМЕТУ ---");
+        Console.Write("Назва: "); var name = Console.ReadLine();
+        Console.Write("Тип: "); var type = Console.ReadLine();
+        Console.Write("Вимоги (необов’язково): "); var req = Console.ReadLine();
+        Console.Write("Тривалість (годин): "); int.TryParse(Console.ReadLine(), out int duration);
+
+        var command = new AddSubjectCommand(new AddSubjectDto { Name = name, Type = type, Requirements = req, Duration = duration });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Предмет додано!" : "❌ Такий предмет уже існує.");
+    }
+
+    private async Task AddClassroomInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ДОДАВАННЯ АУДИТОРІЇ ---");
+        Console.Write("Номер: "); var number = Console.ReadLine();
+        Console.Write("Корпус: "); var building = Console.ReadLine();
+        Console.Write("Вмістимість: "); int.TryParse(Console.ReadLine(), out int capacity);
+        Console.Write("Факультет: "); var faculty = Console.ReadLine();
+        Console.Write("Комп’ютери (так/ні): "); bool hasPc = Console.ReadLine()?.Trim().ToLower() == "так";
+        Console.Write("Проектор (так/ні): "); bool hasProj = Console.ReadLine()?.Trim().ToLower() == "так";
+
+        var command = new AddClassroomCommand(new AddClassroomDto { Number = number, Building = building, Capacity = capacity, Faculty = faculty, HasComputers = hasPc, HasProjector = hasProj });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Аудиторію додано!" : "❌ Така аудиторія вже існує.");
+    }
+
+    private async Task AddTeachingAssignmentInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ПРИЗНАЧЕННЯ ВИКЛАДАННЯ ---");
+        Console.Write("ID Викладача: "); int.TryParse(Console.ReadLine(), out int userId);
+        Console.Write("ID Предмета: "); int.TryParse(Console.ReadLine(), out int subjectId);
+        Console.Write("Кількість годин: "); int.TryParse(Console.ReadLine(), out int hours);
+
+        var command = new AddTeachingAssignmentCommand(new AddTeachingAssignmentDto { UserId = userId, SubjectId = subjectId, Hours = hours });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Призначення додано!" : "❌ Це призначення вже існує.");
+    }
+
+    private async Task AddGroupDisciplineListInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ДОДАВАННЯ ДИСЦИПЛІНИ ДО ГРУПИ ---");
+        Console.Write("ID Групи: "); int.TryParse(Console.ReadLine(), out int groupId);
+        Console.Write("ID Предмета: "); int.TryParse(Console.ReadLine(), out int subjectId);
+        Console.Write("Кількість годин: "); int.TryParse(Console.ReadLine(), out int hours);
+
+        var command = new AddGroupDisciplineListCommand(new AddGroupDisciplineListDto { GroupId = groupId, SubjectId = subjectId, Hours = hours });
+        var success = await _mediator.Send(command);
+        Console.WriteLine(success ? "✅ Дисципліну додано до групи!" : "❌ Така дисципліна вже існує у групи.");
+    }
+
+
+    // --- Метод GenerateWorkloadInteractiveAsync (ЗБЕРЕЖЕНИЙ) ---
+    private async Task GenerateWorkloadInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ГЕНЕРАЦІЯ WORKLOAD (З КЛЮЧАМИ) ---");
+
+        var command = new GenerateWorkloadCommand();
+        var workload = await _mediator.Send(command);
+
+        if (!workload.Any())
+        {
+            Console.WriteLine("❌ Workload порожній. Додайте призначення та дисципліни.");
+            return;
+        }
+
+        Console.WriteLine($"\nЗгенеровано {workload.Count} записів Workload:\n");
+
+        foreach (var item in workload)
+        {
+            Console.WriteLine($"Група: {item.GroupName} | Предмет: {item.SubjectName} ({item.SubjectType}) | Години: {item.Duration} | Викладач: {item.TeacherName} (ID: {item.UserId}) | Аудиторія: {item.ClassroomNumber}");
+        }
+
+        var csvPath = "Workload.csv";
+        
+        using (var writer = new StreamWriter(csvPath))
+        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            // Записуємо заголовки, включаючи всі ID та деталі
+            csv.WriteHeader<WorkloadDto>();
+            csv.NextRecord();
             
-            while (reader.Read())
+            // Записуємо всі записи WorkloadDto
+            csv.WriteRecords(workload);
+        }
+        
+        Console.WriteLine($"\n✅ Workload збережено у файл {csvPath} з усіма полями DTO, включаючи ID.");
+    }
+
+    // --- МЕТОД ГЕНЕРАЦІЇ РОЗКЛАДУ З CSV (ВИПРАВЛЕНИЙ) ---
+    private async Task GenerateScheduleFromCsv()
+    {
+        Console.WriteLine("\n--- ГЕНЕРАЦІЯ РОЗКЛАДУ ТА ЗБЕРЕЖЕННЯ У БД ---");
+
+        var csvPath = "Workload.csv";
+        if (!File.Exists(csvPath))
+        {
+            Console.WriteLine($"❌ Файл {csvPath} не знайдено. Спершу згенеруйте Workload (опція 8).");
+            return;
+        }
+
+        await _generator.GenerateAsync(csvPath);
+    }
+    
+    // --- МЕТОД ПОШУКУ ВІЛЬНОЇ АУДИТОРІЇ ---
+    private async Task FindFreeClassroomInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ПОШУК ВІЛЬНОЇ АУДИТОРІЇ ---");
+
+        // 1. Збір параметрів часу
+        Console.Write("День тижня (1=ПН, 5=ПТ): "); 
+        int dayOfWeek;
+        if (!int.TryParse(Console.ReadLine(), out dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 5)
+        {
+            Console.WriteLine("❌ Некоректний день тижня (має бути від 1 до 5).");
+            return;
+        }
+        
+        Console.WriteLine("Доступні часові слоти: 08:30, 10:10, 11:50, 13:30, 15:10, 16:50, 18:30, 20:10.");
+        Console.Write("Час початку пари (напр., 08:30): "); 
+        TimeOnly startTime;
+        if (!TimeOnly.TryParse(Console.ReadLine(), out startTime))
+        {
+            Console.WriteLine("❌ Невірний формат часу.");
+            return;
+        }
+
+        // 2. Збір вимог
+        Console.Write("Корпус: "); var building = Console.ReadLine() ?? "";
+        
+        Console.Write("Потрібні комп'ютери (так/ні): "); 
+        bool needsComputers = Console.ReadLine()?.Trim().ToLower() == "так";
+        
+        Console.Write("Потрібен проектор (так/ні): "); 
+        bool needsProjector = Console.ReadLine()?.Trim().ToLower() == "так";
+        
+        Console.Write("Потрібна місткість (мін.): "); 
+        int requiredCapacity;
+        int.TryParse(Console.ReadLine(), out requiredCapacity);
+
+        var searchData = new FindFreeClassroomQueryDto
+        {
+            DayOfWeek = dayOfWeek,
+            StartTime = startTime,
+            Building = building,
+            NeedsComputers = needsComputers,
+            NeedsProjector = needsProjector,
+            RequiredCapacity = requiredCapacity
+        };
+
+        var query = new FindFreeClassroomQuery(searchData);
+        
+        // Відправляємо запит через MediatR
+        var results = await _mediator.Send(query);
+
+        Console.WriteLine("\n--- РЕЗУЛЬТАТИ ПОШУКУ ---");
+
+        if (results.Any())
+        {
+            Console.WriteLine($"✅ Знайдено {results.Count} вільних аудиторій, що відповідають вимогам:");
+            
+            // Виводимо найкращий (найменш місткий) варіант першим
+            var bestFit = results.First(); 
+            
+            Console.WriteLine($"РЕКОМЕНДОВАНО: [ID: {bestFit.ClassroomId}] Номер: {bestFit.Number}, Корпус: {bestFit.Building}, Місткість: {bestFit.Capacity}");
+            
+            if (results.Count > 1)
             {
-                for (int i = 0; i < reader.FieldCount; i++)
+                Console.WriteLine($"Інші варіанти (всього {results.Count}):");
+                foreach (var r in results.Skip(1))
                 {
-                    var value = reader[i] is DBNull ? "NULL" : reader[i].ToString();
-                    Console.Write($"{value,-20}");
+                    Console.WriteLine($"  Номер: {r.Number}, Корпус: {r.Building}, Місткість: {r.Capacity}");
                 }
-                Console.WriteLine();
             }
-            
-            reader.Close();
+        }
+        else
+        {
+            Console.WriteLine("❌ Не знайдено жодної вільної аудиторії з такими вимогами.");
+        }
+    }
+    
+    // 🛠️ НОВИЙ МЕТОД: ПОШУК ВИКЛАДАЧА (ОПЦІЯ 11)
+    private async Task FindTeacherLocationInteractiveAsync()
+    {
+        Console.WriteLine("\n--- ПОШУК МІСЦЕЗНАХОДЖЕННЯ ВИКЛАДАЧА ---");
+
+        Console.Write("ПІБ Викладача: "); 
+        var fullName = Console.ReadLine()?.Trim() ?? "";
+
+        Console.Write("Поточний день (1=ПН, 5=ПТ): "); 
+        int currentDay;
+        if (!int.TryParse(Console.ReadLine(), out currentDay) || currentDay < 1 || currentDay > 5)
+        {
+            Console.WriteLine("❌ Некоректний день тижня. Використовуйте 1 (ПН) - 5 (ПТ).");
+            return;
+        }
+
+        Console.Write("Поточний час (напр., 10:00): "); 
+        TimeOnly currentTime;
+        if (!TimeOnly.TryParse(Console.ReadLine(), out currentTime))
+        {
+            Console.WriteLine("❌ Невірний формат часу.");
+            return;
+        }
+
+        var searchData = new FindTeacherLocationQueryDto
+        {
+            FullName = fullName,
+            CurrentDayOfWeek = currentDay,
+            CurrentTime = currentTime
+        };
+
+        var query = new FindTeacherLocationQuery(searchData);
+        var result = await _mediator.Send(query);
+
+        Console.WriteLine("\n--- РЕЗУЛЬТАТ ПОШУКУ ---");
+        
+        if (result.Message.StartsWith("❌"))
+        {
+            Console.WriteLine(result.Message);
+            return;
+        }
+
+        Console.WriteLine($"Факультет викладача: {result.TeacherFaculty}");
+        
+        if (result.IsCurrentlyTeaching)
+        {
+            Console.WriteLine($"СИТУАЦІЯ: {result.Message}");
+            Console.WriteLine($"  Пара триває: з {result.StartTime} до {result.EndTime}");
+            Console.WriteLine($"  Місце: Корпус {result.Building}, Аудиторія {result.ClassroomNumber}");
+        }
+        else if (result.StartTime != default) // Якщо є наступна пара сьогодні
+        {
+            Console.WriteLine($"СИТУАЦІЯ: {result.Message}");
+            Console.WriteLine($"  Наступна пара: з {result.StartTime} до {result.EndTime}");
+            Console.WriteLine($"  Місце: Корпус {result.Building}, Аудиторія {result.ClassroomNumber}");
+        }
+        else
+        {
+            Console.WriteLine(result.Message);
         }
     }
 }

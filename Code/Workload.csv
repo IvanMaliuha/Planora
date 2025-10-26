@@ -1,0 +1,31 @@
+UserId,SubjectId,GroupId,Duration,TeacherName,GroupName,SubjectName,SubjectType,ClassroomNumber,ClassroomBuilding,ClassroomCapacity,HasProjector,HasComputers
+2,1,1,30,User 2,Group 1-A,Mathematics 1,Lecture,105,Building 6,40,True,False
+3,2,2,33,User 3,Group 2-A,Physics 1,Practice,101,Building 2,24,False,False
+4,3,3,36,User 4,Group 3-A,Programming 1,Laboratory,102,Building 3,28,False,True
+5,4,4,39,User 5,Group 4-A,Algorithms 1,Lecture,103,Building 4,32,True,False
+6,5,5,42,User 6,Group 5-A,Database Systems 1,Practice,104,Building 5,36,False,True
+7,6,6,45,User 7,Group 6-A,Web Development 1,Laboratory,105,Building 6,40,True,False
+8,7,7,48,User 8,Group 7-A,Operating Systems 1,Lecture,101,Building 2,24,False,False
+9,8,8,51,User 9,Group 8-A,Computer Networks 1,Practice,102,Building 3,28,False,True
+10,9,9,54,User 10,Group 9-A,Software Engineering 1,Laboratory,103,Building 4,32,True,False
+11,10,10,57,User 11,Group 10-A,Data Structures 1,Lecture,104,Building 5,36,False,True
+12,11,11,60,User 12,Group 1-B,Artificial Intelligence 1,Practice,105,Building 6,40,True,False
+13,12,12,63,User 13,Group 2-B,Machine Learning 1,Laboratory,101,Building 2,24,False,False
+14,13,13,66,User 14,Group 3-B,Cyber Security 1,Lecture,102,Building 3,28,False,True
+15,14,14,69,User 15,Group 4-B,Data Science 1,Practice,103,Building 4,32,True,False
+2,15,15,72,User 2,Group 5-B,Computer Graphics 1,Laboratory,104,Building 5,36,False,True
+3,16,16,75,User 3,Group 6-B,Mobile Development 1,Lecture,105,Building 6,40,True,False
+4,17,17,78,User 4,Group 7-B,Cloud Computing 1,Practice,101,Building 2,24,False,False
+5,18,18,81,User 5,Group 8-B,Big Data 1,Laboratory,102,Building 3,28,False,True
+6,19,19,84,User 6,Group 9-B,Internet of Things 1,Lecture,103,Building 4,32,True,False
+7,20,20,87,User 7,Group 10-B,Blockchain Technology 1,Practice,104,Building 5,36,False,True
+8,21,21,90,User 8,Group 1-C,Mathematics 2,Laboratory,105,Building 6,40,True,False
+9,22,22,93,User 9,Group 2-C,Physics 2,Lecture,101,Building 2,24,False,False
+10,23,23,96,User 10,Group 3-C,Programming 2,Practice,102,Building 3,28,False,True
+11,24,24,99,User 11,Group 4-C,Algorithms 2,Laboratory,103,Building 4,32,True,False
+12,25,25,102,User 12,Group 5-C,Database Systems 2,Lecture,104,Building 5,36,False,True
+13,26,26,105,User 13,Group 6-C,Web Development 2,Practice,105,Building 6,40,True,False
+14,27,27,108,User 14,Group 7-C,Operating Systems 2,Laboratory,101,Building 2,24,False,False
+15,28,28,111,User 15,Group 8-C,Computer Networks 2,Lecture,102,Building 3,28,False,True
+2,29,29,114,User 2,Group 9-C,Software Engineering 2,Practice,103,Building 4,32,True,False
+3,30,30,117,User 3,Group 10-C,Data Structures 2,Laboratory,104,Building 5,36,False,True

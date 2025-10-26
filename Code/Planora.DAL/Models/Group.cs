@@ -9,5 +9,6 @@ namespace Planora.DAL.Models
 
         public ICollection<Student>? Students { get; set; }
         public ICollection<GroupDisciplineList>? DisciplineLists { get; set; }
+        public string Number { get; set; }
     }
 }
