@@ -29,14 +29,12 @@ namespace Planora.ViewModels.ViewModels
                 "За типом"
             };
 
-            // Команди
             AddClassroomCommand = new RelayCommand(ExecuteAddClassroom);
             EditClassroomCommand = new RelayCommand(ExecuteEditClassroom, CanExecuteEditDelete);
             DeleteClassroomCommand = new RelayCommand(ExecuteDeleteClassroom, CanExecuteEditDelete);
             SaveClassroomCommand = new RelayCommand(ExecuteSaveClassroom, CanExecuteSave);
             CancelCommand = new RelayCommand(ExecuteCancel);
 
-            // Нова аудиторія для форми
             NewClassroom = new ClassroomItem();
         }
 
@@ -82,27 +80,22 @@ namespace Planora.ViewModels.ViewModels
 
         public ClassroomItem NewClassroom { get; }
 
-        // Команди
         public RelayCommand AddClassroomCommand { get; }
         public RelayCommand EditClassroomCommand { get; }
         public RelayCommand DeleteClassroomCommand { get; }
         public RelayCommand SaveClassroomCommand { get; }
         public RelayCommand CancelCommand { get; }
 
-        // Фільтрація аудиторій
         private void FilterClassrooms()
         {
-            // Тут буде логіка фільтрації, коли буде реалізовано UI
             System.Diagnostics.Debug.WriteLine($"Пошук: {SearchText}, Фільтр: {SelectedFilter}");
         }
 
-        // Перевірка можливості виконання команд редагування/видалення
         private bool CanExecuteEditDelete(object parameter)
         {
             return SelectedClassroom != null && !IsEditMode;
         }
 
-        // Перевірка можливості збереження
         private bool CanExecuteSave(object parameter)
         {
             return IsEditMode && 
@@ -112,7 +105,6 @@ namespace Planora.ViewModels.ViewModels
                    NewClassroom.Capacity > 0;
         }
 
-        // Додавання нової аудиторії
         private void ExecuteAddClassroom(object parameter)
         {
             IsEditMode = true;
@@ -127,14 +119,12 @@ namespace Planora.ViewModels.ViewModels
             System.Diagnostics.Debug.WriteLine("Режим додавання нової аудиторії");
         }
 
-        // Редагування існуючої аудиторії
         private void ExecuteEditClassroom(object parameter)
         {
             if (SelectedClassroom != null)
             {
                 IsEditMode = true;
                 
-                // Копіюємо дані вибраної аудиторії в форму редагування
                 NewClassroom.Number = SelectedClassroom.Number;
                 NewClassroom.Building = SelectedClassroom.Building;
                 NewClassroom.Type = SelectedClassroom.Type;
@@ -147,7 +137,6 @@ namespace Planora.ViewModels.ViewModels
             }
         }
 
-        // Видалення аудиторії
         private void ExecuteDeleteClassroom(object parameter)
         {
             if (SelectedClassroom != null)
@@ -158,26 +147,22 @@ namespace Planora.ViewModels.ViewModels
             }
         }
 
-        // Збереження змін (додавання або редагування)
         private void ExecuteSaveClassroom(object parameter)
         {
             try
             {
                 if (IsEditMode)
                 {
-                    // Перевіряємо, чи це новий запис чи редагування існуючого
                     var existingClassroom = Classrooms.FirstOrDefault(c => c.Number == NewClassroom.Number && c.Building == NewClassroom.Building);
                     
                     if (existingClassroom != null && existingClassroom != SelectedClassroom)
                     {
-                        // Аудиторія з таким номером і корпусом вже існує
                         System.Diagnostics.Debug.WriteLine("Помилка: Аудиторія з таким номером і корпусом вже існує");
                         return;
                     }
 
                     if (SelectedClassroom == null)
                     {
-                        // Додавання нової аудиторії
                         Classrooms.Add(new ClassroomItem
                         {
                             Number = NewClassroom.Number,
@@ -211,7 +196,6 @@ namespace Planora.ViewModels.ViewModels
             }
         }
 
-        // Скасування операції
         private void ExecuteCancel(object parameter)
         {
             IsEditMode = false;

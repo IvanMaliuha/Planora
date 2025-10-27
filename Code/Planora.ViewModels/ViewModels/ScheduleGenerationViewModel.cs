@@ -5,6 +5,7 @@ using System.Linq;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Planora.ViewModels.Models;
 
 namespace Planora.ViewModels.ViewModels
 {
@@ -291,16 +292,5 @@ namespace Planora.ViewModels.ViewModels
             get => _classroomRequirements;
             set => SetProperty(ref _classroomRequirements, value);
         }
-    }
-
-    public class ScheduleItem : ViewModelBase
-    {
-        public string Day { get; set; } = string.Empty;
-        public string Time { get; set; } = string.Empty;
-        public string Teacher { get; set; } = string.Empty;
-        public string Subject { get; set; } = string.Empty;
-        public string Group { get; set; } = string.Empty;
-        public string Classroom { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
     }
 }
