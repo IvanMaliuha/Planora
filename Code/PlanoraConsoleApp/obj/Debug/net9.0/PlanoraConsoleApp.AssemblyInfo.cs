@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PlanoraConsoleApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8b94fd32fa2d9e2a9632d23c248b811947b0681")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+96014f4467fdac2e986c5e757002d6d73f7958d4")]
 [assembly: System.Reflection.AssemblyProductAttribute("PlanoraConsoleApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PlanoraConsoleApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
