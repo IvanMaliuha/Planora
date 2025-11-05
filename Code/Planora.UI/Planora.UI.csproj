@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+	  <TargetFramework>net9.0-windows</TargetFramework>
+	  <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Planora.BLL\Planora.BLL.csproj" />
+    <ProjectReference Include="..\Planora.DAL\Planora.DAL.csproj" />
+    <ProjectReference Include="..\Planora.ViewModels\Planora.ViewModels.csproj" />
+    <ProjectReference Include="..\PlanoraConsoleApp\PlanoraConsoleApp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Images\emblem.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CustomToolNamespace></CustomToolNamespace>
+    </None>
+  </ItemGroup>
+
+</Project>

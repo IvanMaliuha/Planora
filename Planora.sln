@@ -4,12 +4,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Code", "Code", "{314C6247-30EA-3492-19B6-DF847E3B326F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planora.DAL", "Code\Planora.DAL\Planora.DAL.csproj", "{17F7F7E4-3798-8151-CB12-CD607FADA9FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanoraConsoleApp", "Code\PlanoraConsoleApp\PlanoraConsoleApp.csproj", "{CBEE7246-8A57-8598-DB79-509631D606E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planora.BLL", "Code\Planora.BLL\Planora.BLL.csproj", "{E9ECEB00-029A-406C-A109-2EB099C32CE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planora.ViewModels", "Code\Planora.ViewModels\Planora.ViewModels.csproj", "{E6B295B2-694A-64AA-D09B-29AA98F97BD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planora.UI", "Code\Planora.UI\Planora.UI.csproj", "{B661E681-AE09-438A-89E5-0617FDC196B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +64,30 @@ Global
 		{E9ECEB00-029A-406C-A109-2EB099C32CE1}.Release|x64.Build.0 = Release|Any CPU
 		{E9ECEB00-029A-406C-A109-2EB099C32CE1}.Release|x86.ActiveCfg = Release|Any CPU
 		{E9ECEB00-029A-406C-A109-2EB099C32CE1}.Release|x86.Build.0 = Release|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Debug|x64.Build.0 = Debug|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Debug|x86.Build.0 = Debug|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Release|x64.ActiveCfg = Release|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Release|x64.Build.0 = Release|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Release|x86.ActiveCfg = Release|Any CPU
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0}.Release|x86.Build.0 = Release|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Debug|x64.Build.0 = Debug|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Debug|x86.Build.0 = Debug|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Release|x64.ActiveCfg = Release|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Release|x64.Build.0 = Release|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Release|x86.ActiveCfg = Release|Any CPU
+		{B661E681-AE09-438A-89E5-0617FDC196B3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +96,8 @@ Global
 		{17F7F7E4-3798-8151-CB12-CD607FADA9FD} = {314C6247-30EA-3492-19B6-DF847E3B326F}
 		{CBEE7246-8A57-8598-DB79-509631D606E0} = {314C6247-30EA-3492-19B6-DF847E3B326F}
 		{E9ECEB00-029A-406C-A109-2EB099C32CE1} = {314C6247-30EA-3492-19B6-DF847E3B326F}
+		{E6B295B2-694A-64AA-D09B-29AA98F97BD0} = {314C6247-30EA-3492-19B6-DF847E3B326F}
+		{B661E681-AE09-438A-89E5-0617FDC196B3} = {314C6247-30EA-3492-19B6-DF847E3B326F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A06CF17B-AB7E-46D9-9E03-A5D6599ABD55}
