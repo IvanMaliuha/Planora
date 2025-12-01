@@ -1,9 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.Windows.Input; // 👈 1. Цього не вистачало (це простір імен для команд)
 
 namespace Planora.ViewModels.Commands
 {
-    public class RelayCommand : INotifyPropertyChanged
+    // 👇 2. Додаємо ": ICommand" — тепер система знає, що це команда
+    public class RelayCommand : ICommand 
     {
         private readonly Action<object> _execute;
         private readonly Func<object, bool> _canExecute;
@@ -14,22 +16,18 @@ namespace Planora.ViewModels.Commands
             _canExecute = canExecute;
         }
 
+        // Цей метод перевіряє, чи можна натиснути кнопку
         public bool CanExecute(object parameter) => _canExecute?.Invoke(parameter) ?? true;
 
+        // Цей метод виконує дію
         public void Execute(object parameter) => _execute(parameter);
 
+        // Ця подія каже кнопці: "Перевір, чи можна мене натиснути зараз"
         public event EventHandler CanExecuteChanged;
 
         public void RaiseCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

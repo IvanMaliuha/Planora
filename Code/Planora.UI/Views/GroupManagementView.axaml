@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             x:Class="Planora.Views.GroupManagementView"
+             x:DataType="vm:GroupManagementViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- ТУЛБАР -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,20">
+            <TextBlock Text="Групи" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0"/>
+            
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Watermark="Пошук..." Width="200"/>
+            
+            <Button Command="{Binding AddGroupCommand}" Content="+ Додати" Background="#2563EB" Foreground="White"/>
+            
+            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding SelectedGroup, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Button Command="{Binding EditGroupCommand}" Content="✏️ Редагувати"/>
+                <Button Command="{Binding DeleteGroupCommand}" Content="🗑️ Видалити" Background="#FEE2E2" Foreground="#DC2626"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- ТАБЛИЦЯ -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Groups}" 
+                  SelectedItem="{Binding SelectedGroup}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal"
+                  BorderThickness="1" BorderBrush="#E5E7EB" CornerRadius="4">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Назва групи" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Факультет" Binding="{Binding Faculty}" Width="1.5*"/>
+                <DataGridTextColumn Header="Курс" Binding="{Binding Course}" Width="0.5*"/>
+                <DataGridTextColumn Header="Студентів" Binding="{Binding StudentCount}" Width="0.8*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- ФОРМА РЕДАГУВАННЯ -->
+        <Grid Grid.RowSpan="2" Background="#99000000" IsVisible="{Binding IsEditMode}">
+            <Border Background="White" Width="400" VerticalAlignment="Center" CornerRadius="10" Padding="20" BoxShadow="0 4 20 0 #30000000">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="Редагування групи" FontSize="20" FontWeight="Bold"/>
+                    
+                    <StackPanel>
+                        <TextBlock Text="Назва групи (напр. КН-101)"/>
+                        <TextBox Text="{Binding NewGroup.Name, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="Факультет"/>
+                        <TextBox Text="{Binding NewGroup.Faculty, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*, 10, *">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Курс"/>
+                            <NumericUpDown Value="{Binding NewGroup.Course}" Minimum="1" Maximum="6"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Кількість студентів"/>
+                            <NumericUpDown Value="{Binding NewGroup.StudentCount}" Minimum="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+                        <Button Command="{Binding CancelCommand}" Content="Скасувати"/>
+                        <Button Command="{Binding SaveGroupCommand}" Content="Зберегти" Background="#2563EB" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

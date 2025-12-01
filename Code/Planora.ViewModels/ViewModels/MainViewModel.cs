@@ -1,6 +1,5 @@
 using Planora.ViewModels.Base;
 using Planora.ViewModels.Commands;
-using Planora.ViewModels.ViewModels;
 
 namespace Planora.ViewModels.ViewModels
 {
@@ -11,10 +10,8 @@ namespace Planora.ViewModels.ViewModels
 
         public MainViewModel()
         {
-
-            CurrentViewModel = new LoginViewModel();
-            
-            ShowLoginCommand = new RelayCommand(_ => CurrentViewModel = new LoginViewModel());
+            // Замість простого створення, ми викликаємо метод, який налаштовує переходи
+            ShowLogin();
         }
 
         public ViewModelBase CurrentViewModel
@@ -29,6 +26,60 @@ namespace Planora.ViewModels.ViewModels
             set => SetProperty(ref _title, value);
         }
 
-        public RelayCommand ShowLoginCommand { get; }
+        // Цей метод показує екран входу і "слухає", чи пройшов вхід успішно
+        public void ShowLogin()
+        {
+            var loginVm = new LoginViewModel();
+            
+            // 👇 ТЕПЕР МИ ОТРИМУЄМО ЛОГІН (username)
+            loginVm.OnLoginSuccess += (username) => 
+            {
+                if (username.ToLower() == "admin")
+                {
+                    ShowAdminDashboard();
+                }
+                else if (username.ToLower() == "teacher") // 👇 ДОДАЛИ ВИКЛАДАЧА
+                {
+                    ShowTeacherDashboard();
+                }
+                else
+                {
+                    ShowStudentDashboard();
+                }
+            };
+            
+            CurrentViewModel = loginVm;
+        }
+
+        public void ShowStudentDashboard()
+        {
+            var dashboardVm = new DashboardViewModel();
+            dashboardVm.OnLogout += () => ShowLogin();
+            CurrentViewModel = dashboardVm;
+        }
+
+        public void ShowAdminDashboard()
+        {
+            var adminVm = new AdminDashboardViewModel();
+            adminVm.OnLogout += () => ShowLogin();
+            CurrentViewModel = adminVm;
+        }
+
+        public void ShowTeacherDashboard()
+        {
+            var teacherVm = new TeacherDashboardViewModel();
+            teacherVm.OnLogout += () => ShowLogin();
+            CurrentViewModel = teacherVm;
+        }
+
+        // Цей метод перемикає екран на головний (Dashboard)
+        public void ShowDashboard()
+        {
+            CurrentViewModel = new DashboardViewModel();
+            var dashboardVm = new DashboardViewModel();
+            dashboardVm.OnLogout += () => ShowLogin();
+            
+            CurrentViewModel = dashboardVm;
+        }
     }
 }

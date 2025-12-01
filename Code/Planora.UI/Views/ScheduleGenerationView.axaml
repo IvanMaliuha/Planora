@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             x:Class="Planora.Views.ScheduleGenerationView"
+             x:DataType="vm:ScheduleGenerationViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <TextBlock Text="Генерація розкладу" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" Margin="0,20">
+            
+            <!-- ЛІВА ЧАСТИНА: Параметри -->
+            <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="30" Margin="0,0,20,0" BoxShadow="0 2 10 0 #10000000">
+                <StackPanel Spacing="20">
+                    <TextBlock Text="Параметри генерації" FontSize="18" FontWeight="SemiBold"/>
+                    
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Семестр"/>
+                        <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch">
+                            <ComboBoxItem>Осінній 2025</ComboBoxItem>
+                            <ComboBoxItem>Весняний 2026</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <CheckBox IsChecked="{Binding Parameters.OptimizeWindows}" Content="Оптимізувати 'вікна' (не більше 1)"/>
+                    <CheckBox IsChecked="{Binding Parameters.ConsiderWishes}" Content="Врахувати побажання викладачів"/>
+                    <CheckBox Content="Використовувати лише вільні аудиторії" IsChecked="True"/>
+
+                    <Button Command="{Binding GenerateCommand}" 
+                            Content="🚀 Запустити генерацію" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Background="#2563EB" Foreground="White" Padding="15"
+                            FontSize="16" FontWeight="Bold" Margin="0,20,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ПРАВА ЧАСТИНА: Статус -->
+            <Border Grid.Column="1" Background="White" CornerRadius="10" Padding="30" Margin="20,0,0,0" BoxShadow="0 2 10 0 #10000000">
+                <StackPanel VerticalAlignment="Center" Spacing="20">
+                    
+                    <Border Width="100" Height="100" Background="#F3F4F6" CornerRadius="50" Margin="0,0,0,20">
+                        <Panel>
+                            <TextBlock Text="⚙️" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !IsCompleted}"/>
+                            <TextBlock Text="✅" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsCompleted}"/>
+                        </Panel>
+                    </Border>
+
+                    <TextBlock Text="{Binding StatusMessage}" 
+                               HorizontalAlignment="Center" FontSize="16" FontWeight="Medium" 
+                               TextWrapping="Wrap" TextAlignment="Center"/>
+
+                    <ProgressBar Value="{Binding Progress}" Maximum="100" Height="10" 
+                                 Foreground="#2563EB" Background="#E5E7EB" CornerRadius="5"
+                                 IsVisible="{Binding IsGenerating}"/>
+                    
+                    <!-- 👇 ВИПРАВЛЕНО ТУТ: Додано {} перед {0}% -->
+                    <TextBlock Text="{Binding Progress, StringFormat='{}{0}%'}" 
+                               HorizontalAlignment="Center" Foreground="Gray"
+                               IsVisible="{Binding IsGenerating}"/>
+
+                    <Button Command="{Binding ViewResultCommand}"
+                            Content="Переглянути результат" 
+                            HorizontalAlignment="Center"
+                            IsVisible="{Binding IsCompleted}"
+                            Background="#10B981" Foreground="White"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

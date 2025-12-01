@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             x:Class="Planora.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <Grid ColumnDefinitions="250, *" Background="#F3F4F6">
+        
+        <Border Grid.Column="0" Background="White" BoxShadow="2 0 10 0 #10000000" ZIndex="1">
+            <Grid RowDefinitions="Auto, *, Auto">
+                
+                <StackPanel Grid.Row="0" Margin="20">
+                    <TextBlock Text="Planora" FontSize="24" FontWeight="Bold" Foreground="#2563EB"/>
+                    <TextBlock Text="Student Panel" FontSize="12" Foreground="Gray"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Spacing="5" Margin="10">
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Schedule"
+                            Content="📅  Мій розклад" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                            Background="Transparent" BorderThickness="0"/>
+                    
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Classrooms"
+                            Content="bfs  Пошук аудиторій" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                            Background="Transparent" BorderThickness="0"/>
+
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Teachers"
+                            Content="👨‍🏫  Викладачі" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                            Background="Transparent" BorderThickness="0"/>
+                    
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Profile"
+                            Content="👤  Профіль" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                            Background="Transparent" BorderThickness="0"/>
+                </StackPanel>
+
+                <Border Grid.Row="2" BorderBrush="#E5E7EB" BorderThickness="0,1,0,0" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="{Binding UserName}" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding UserRole}" FontSize="12" Foreground="Gray"/>
+                        <Button Content="Вийти" Command="{Binding LogoutCommand}" 
+                                Margin="0,10,0,0" Background="#FEE2E2" Foreground="#DC2626"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto, *">
+            <Border Grid.Row="0" Background="White" Height="60" Padding="20,0">
+                <TextBlock Text="Головна" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="16"/>
+            </Border>
+
+            <TransitioningContentControl Grid.Row="1" Content="{Binding CurrentPage}" Padding="20"/>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -3,194 +3,157 @@ using Planora.ViewModels.Commands;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Collections.Generic; // Важливо
 
 namespace Planora.ViewModels.ViewModels
 {
-  public class ClassroomSearchViewModel : ViewModelBase
-  {
-    private DateTime _startTime = DateTime.Now;
-    private DateTime _endTime = DateTime.Now.AddHours(2);
-    private string _selectedBuilding = "Всі";
-    private bool _isSearching;
-
-    public ClassroomSearchViewModel()
+    public class ClassroomDto
     {
-      SearchResults = new ObservableCollection<ClassroomItem>();
-      Buildings = new ObservableCollection<string> { "Всі", "A", "B", "C" };
-      ClassroomTypes = new ObservableCollection<string> { "Всі", "Лекційна", "Практична", "Лабораторна" };
+        public string Number { get; set; } = "";
+        public string Building { get; set; } = "";
+        public string Type { get; set; } = ""; 
+        public int Capacity { get; set; }
+        public bool HasComputers { get; set; }
+        public bool HasProjector { get; set; }
+        public bool IsFree { get; set; } = true;
+    }
 
-      AllClassrooms = new ObservableCollection<ClassroomItem>
+    public class ClassroomSearchViewModel : ViewModelBase
+    {
+        private string _searchText = string.Empty;
+        private ClassroomDto? _selectedClassroom;
+        private bool _isSearching;
+        
+        // Фільтри
+        private string _selectedBuilding = "Всі";
+        private string _selectedType = "Всі";
+        private bool _hasComputers;
+        private bool _hasProjector;
+
+        // "База даних"
+        private List<ClassroomDto> _allClassrooms = new();
+
+        public ClassroomSearchViewModel()
+        {
+            // 👇 Ініціалізація колекцій (обов'язково!)
+            Buildings = new ObservableCollection<string> { "Всі", "Корпус А", "Корпус Б", "Корпус В" };
+            ClassroomTypes = new ObservableCollection<string> { "Всі", "Лекційна", "Практична", "Лабораторна" };
+            SearchResults = new ObservableCollection<ClassroomDto>();
+            
+            SearchCommand = new RelayCommand(ExecuteSearch);
+            OpenDetailCommand = new RelayCommand(ExecuteOpenDetail);
+            CloseDetailCommand = new RelayCommand(_ => SelectedClassroom = null);
+
+            // Генеруємо дані
+            InitializeData();
+            
+            // Перший пошук
+            FilterData();
+        }
+
+        // --- Властивості ---
+        public string SearchText
+        {
+            get => _searchText;
+            set { SetProperty(ref _searchText, value); FilterData(); }
+        }
+
+        public string SelectedBuilding
+        {
+            get => _selectedBuilding;
+            set { SetProperty(ref _selectedBuilding, value); FilterData(); }
+        }
+
+        public string SelectedType
+        {
+            get => _selectedType;
+            set { SetProperty(ref _selectedType, value); FilterData(); }
+        }
+
+        public bool HasComputers
+        {
+            get => _hasComputers;
+            set { SetProperty(ref _hasComputers, value); FilterData(); }
+        }
+
+        public bool HasProjector
+        {
+            get => _hasProjector;
+            set { SetProperty(ref _hasProjector, value); FilterData(); }
+        }
+
+        public ClassroomDto? SelectedClassroom
+        {
+            get => _selectedClassroom;
+            set => SetProperty(ref _selectedClassroom, value);
+        }
+
+        public bool IsSearching
+        {
+            get => _isSearching;
+            set => SetProperty(ref _isSearching, value);
+        }
+
+        // --- Колекції ---
+        public ObservableCollection<string> Buildings { get; }
+        public ObservableCollection<string> ClassroomTypes { get; }
+        public ObservableCollection<ClassroomDto> SearchResults { get; }
+        
+        public RelayCommand SearchCommand { get; }
+        public RelayCommand OpenDetailCommand { get; }
+        public RelayCommand CloseDetailCommand { get; }
+
+        // --- Методи ---
+
+        private void InitializeData()
+        {
+            var rand = new Random();
+            for (int i = 101; i < 130; i++)
             {
-                new ClassroomItem { Number = "101", Building = "A", Type = "Лекційна", Capacity = 50, HasComputers = true, HasProjector = true },
-                new ClassroomItem { Number = "102", Building = "A", Type = "Лекційна", Capacity = 60, HasComputers = false, HasProjector = true },
-                new ClassroomItem { Number = "201", Building = "B", Type = "Лабораторна", Capacity = 25, HasComputers = true, HasProjector = false },
-                new ClassroomItem { Number = "202", Building = "B", Type = "Лабораторна", Capacity = 30, HasComputers = true, HasProjector = true },
-                new ClassroomItem { Number = "301", Building = "C", Type = "Практична", Capacity = 30, HasComputers = false, HasProjector = true },
-                new ClassroomItem { Number = "302", Building = "C", Type = "Практична", Capacity = 40, HasComputers = true, HasProjector = true }
-            };
-
-      SearchCommand = new RelayCommand(ExecuteSearch, CanExecuteSearch);
-      UseMyScheduleCommand = new RelayCommand(ExecuteUseMySchedule);
-    }
-
-    public DateTime StartTime
-    {
-      get => _startTime;
-      set => SetProperty(ref _startTime, value);
-    }
-
-    public DateTime EndTime
-    {
-      get => _endTime;
-      set => SetProperty(ref _endTime, value);
-    }
-
-    private bool _hasComputers;
-    private bool _hasProjector;
-
-    public bool HasComputers
-    {
-      get => _hasComputers;
-      set => SetProperty(ref _hasComputers, value);
-    }
-
-    public bool HasProjector
-    {
-      get => _hasProjector;
-      set => SetProperty(ref _hasProjector, value);
-    }
-
-    public string SelectedBuilding
-    {
-      get => _selectedBuilding;
-      set => SetProperty(ref _selectedBuilding, value);
-    }
-
-    private string _selectedType = "Всі";
-    private int _minCapacity;
-
-    public string SelectedType
-    {
-      get => _selectedType;
-      set
-      {
-        SetProperty(ref _selectedType, value);
-        // Автоматичний пошук при зміні фільтрів (опціонально)
-        // ExecuteSearch(null);
-      }
-    }
-
-    public int MinCapacity
-    {
-      get => _minCapacity;
-      set
-      {
-        SetProperty(ref _minCapacity, value);
-        // Автоматичний пошук при зміні фільтрів (опціонально)
-        // ExecuteSearch(null);
-      }
-    }
-
-    public bool IsSearching
-    {
-      get => _isSearching;
-      set
-      {
-        SetProperty(ref _isSearching, value);
-        SearchCommand.RaiseCanExecuteChanged();
-      }
-    }
-
-    public ObservableCollection<string> Buildings { get; }
-    public ObservableCollection<string> ClassroomTypes { get; }
-    public ObservableCollection<ClassroomItem> SearchResults { get; }
-    public ObservableCollection<ClassroomItem> AllClassrooms { get; }
-
-    public RelayCommand SearchCommand { get; }
-    public RelayCommand UseMyScheduleCommand { get; }
-
-    private bool CanExecuteSearch(object parameter)
-    {
-      return !IsSearching &&
-             StartTime < EndTime &&
-             StartTime >= DateTime.Today;
-    }
-
-    private async void ExecuteSearch(object parameter)
-    {
-      try
-      {
-        IsSearching = true;
-        SearchResults.Clear();
-
-        // Імітація затримки пошуку
-        await System.Threading.Tasks.Task.Delay(500);
-
-        var availableClassrooms = AllClassrooms.Where(c =>
-            (SelectedBuilding == "Всі" || c.Building == SelectedBuilding) &&
-            (SelectedType == "Всі" || c.Type == SelectedType) &&
-            (!HasComputers || c.HasComputers) &&
-            (!HasProjector || c.HasProjector) &&
-            (MinCapacity == 0 || c.Capacity >= MinCapacity)
-        ).ToList();
-
-        // Імітація перевірки
-        var random = new Random();
-        foreach (var classroom in availableClassrooms)
-        {
-          // рандомимо вільна аудиторія чи ні для демонстрації
-          bool isFree = random.Next(0, 2) == 0;
-
-          if (isFree)
-          {
-            SearchResults.Add(classroom);
-          }
+                _allClassrooms.Add(new ClassroomDto { 
+                    Number = i.ToString(), 
+                    Building = i < 115 ? "Корпус А" : "Корпус Б", 
+                    Type = i % 2 == 0 ? "Лекційна" : "Лабораторна", 
+                    Capacity = rand.Next(20, 100),
+                    HasComputers = i % 3 == 0,
+                    HasProjector = i % 4 == 0,
+                    IsFree = i % 5 != 0
+                });
+            }
         }
 
-        if (SearchResults.Any())
+        // Цей метод використовується для кнопки "Знайти" (з імітацією затримки)
+        private async void ExecuteSearch(object parameter)
         {
-          Debug.WriteLine($"Знайдено {SearchResults.Count} вільних аудиторій");
+            IsSearching = true;
+            await Task.Delay(300);
+            FilterData();
+            IsSearching = false;
         }
-        else
+
+        // Цей метод миттєво фільтрує локальний список
+        private void FilterData()
         {
-          Debug.WriteLine("Вільних аудиторій не знайдено");
+            SearchResults.Clear();
+            
+            var filtered = _allClassrooms.Where(c => 
+                (string.IsNullOrEmpty(SearchText) || c.Number.Contains(SearchText)) &&
+                (SelectedBuilding == "Всі" || c.Building == SelectedBuilding) &&
+                (SelectedType == "Всі" || c.Type == SelectedType) &&
+                (!HasComputers || c.HasComputers) &&
+                (!HasProjector || c.HasProjector)
+            );
+
+            foreach (var item in filtered) SearchResults.Add(item);
         }
-      }
-      catch (Exception ex)
-      {
-        Debug.WriteLine($"Помилка пошуку: {ex.Message}");
-      }
-      finally
-      {
-        IsSearching = false;
-      }
+
+        private void ExecuteOpenDetail(object parameter)
+        {
+            if (parameter is ClassroomDto classroom)
+            {
+                SelectedClassroom = classroom;
+            }
+        }
     }
-
-    private void ExecuteUseMySchedule(object parameter)
-    {
-
-      var now = DateTime.Now;
-      StartTime = now.Date.AddHours(14).AddMinutes(0); // 14:00
-      EndTime = now.Date.AddHours(15).AddMinutes(30);  // 15:30
-
-      Debug.WriteLine("Вибрано час з розкладу: 14:00 - 15:30");
-    }
-
-    // швидкий пошук
-    public void SearchForNow()
-    {
-      StartTime = DateTime.Now;
-      EndTime = DateTime.Now.AddHours(2);
-      ExecuteSearch(null);
-    }
-
-    // пошук на день/час
-    public void SearchForDate(DateTime date)
-    {
-      StartTime = date.Date.AddHours(8); // 08:00
-      EndTime = date.Date.AddHours(20);  // 20:00
-      ExecuteSearch(null);
-    }
-  }
 }

@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="550"
+             x:Class="Planora.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+
+    <Grid Background="#F3F4F6">
+        <Border Background="White" CornerRadius="12" BoxShadow="0 4 20 0 #20000000"
+                Margin="20" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center" Width="380">
+            <StackPanel Spacing="20">
+                <TextBlock Text="Planora" FontSize="28" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center"/>
+                
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Логін" FontWeight="Medium"/>
+                    <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" 
+                            Watermark="Ваш логін"/>
+                </StackPanel>
+
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Пароль" FontWeight="Medium"/>
+                    <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" 
+                            PasswordChar="•" 
+                            Watermark="Ваш пароль"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <CheckBox Grid.Column="0" IsChecked="{Binding RememberMe}" Content="Запам'ятати мене"/>
+                </Grid>
+
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#DC2626" TextWrapping="Wrap"
+                           FontSize="13" HorizontalAlignment="Center"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                <StackPanel Spacing="10" Margin="0,10,0,0">
+                    <Button Command="{Binding LoginCommand}" Content="Увійти" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Background="#2563EB" Foreground="White" FontWeight="SemiBold"/>
+
+                    <Button Command="{Binding ResetCommand}" Content="Очистити поля"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Background="Transparent" Foreground="#6B7280"/>
+                </StackPanel>
+
+                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" Height="2" Foreground="#2563EB"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
