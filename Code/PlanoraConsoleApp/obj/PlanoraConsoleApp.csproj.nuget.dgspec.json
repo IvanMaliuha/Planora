@@ -1,34 +1,33 @@
 {
   "format": 1,
   "restore": {
-    "/Users/arteran/local_Documents/Planora/Planora/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj": {}
+    "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj": {}
   },
   "projects": {
-    "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.BLL/Planora.BLL.csproj": {
+    "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.BLL/Planora.BLL.csproj",
+        "projectUniqueName": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj",
         "projectName": "Planora.BLL",
-        "projectPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.BLL/Planora.BLL.csproj",
-        "packagesPath": "/Users/arteran/.nuget/packages/",
-        "outputPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.BLL/obj/",
+        "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj",
+        "packagesPath": "/Users/maya/.nuget/packages/",
+        "outputPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/arteran/.nuget/NuGet/NuGet.Config"
+          "/Users/maya/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj": {
-                "projectPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj"
+              "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj": {
+                "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj"
               }
             }
           }
@@ -43,7 +42,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -70,27 +69,26 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj": {
+    "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj",
+        "projectUniqueName": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj",
         "projectName": "Planora.DAL",
-        "projectPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj",
-        "packagesPath": "/Users/arteran/.nuget/packages/",
-        "outputPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/obj/",
+        "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj",
+        "packagesPath": "/Users/maya/.nuget/packages/",
+        "outputPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/arteran/.nuget/NuGet/NuGet.Config"
+          "/Users/maya/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -109,7 +107,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -158,38 +156,37 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "/Users/arteran/local_Documents/Planora/Planora/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj": {
+    "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/arteran/local_Documents/Planora/Planora/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj",
+        "projectUniqueName": "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj",
         "projectName": "PlanoraConsoleApp",
-        "projectPath": "/Users/arteran/local_Documents/Planora/Planora/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj",
-        "packagesPath": "/Users/arteran/.nuget/packages/",
-        "outputPath": "/Users/arteran/local_Documents/Planora/Planora/Code/PlanoraConsoleApp/obj/",
+        "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj",
+        "packagesPath": "/Users/maya/.nuget/packages/",
+        "outputPath": "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/arteran/.nuget/NuGet/NuGet.Config"
+          "/Users/maya/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.BLL/Planora.BLL.csproj": {
-                "projectPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.BLL/Planora.BLL.csproj"
+              "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj": {
+                "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj"
               },
-              "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj": {
-                "projectPath": "/Users/arteran/local_Documents/Planora/Planora/Code/Planora.DAL/Planora.DAL.csproj"
+              "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj": {
+                "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj"
               }
             }
           }
@@ -204,7 +201,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -253,7 +250,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

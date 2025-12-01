@@ -55,7 +55,7 @@ await runner.RunAsync();
 
 // --- RUNNER КОНСОЛЬНОГО ЗАСТОСУНКУ ---
 
-internal class ConsoleAppRunner
+public class ConsoleAppRunner
 {
     private readonly IMediator _mediator;
     private readonly ScheduleGenerator _generator; 
