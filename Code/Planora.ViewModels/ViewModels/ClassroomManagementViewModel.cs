@@ -3,7 +3,6 @@ using Planora.ViewModels.Commands;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System;
-
 namespace Planora.ViewModels.ViewModels
 {
     public class ClassroomManagementViewModel : ViewModelBase
@@ -32,7 +31,7 @@ namespace Planora.ViewModels.ViewModels
             AddClassroomCommand = new RelayCommand(ExecuteAddClassroom);
             EditClassroomCommand = new RelayCommand(ExecuteEditClassroom, CanExecuteEditDelete);
             DeleteClassroomCommand = new RelayCommand(ExecuteDeleteClassroom, CanExecuteEditDelete);
-            SaveClassroomCommand = new RelayCommand(ExecuteSaveClassroom, CanExecuteSave);
+            SaveClassroomCommand = new RelayCommand(ExecuteSaveClassroom);
             CancelCommand = new RelayCommand(ExecuteCancel);
 
             NewClassroom = new ClassroomItem();
@@ -111,7 +110,7 @@ namespace Planora.ViewModels.ViewModels
             NewClassroom.Number = string.Empty;
             NewClassroom.Building = string.Empty;
             NewClassroom.Type = string.Empty;
-            NewClassroom.Capacity = 0;
+            NewClassroom.Capacity = 30;
             NewClassroom.HasComputers = false;
             NewClassroom.HasProjector = false;
             

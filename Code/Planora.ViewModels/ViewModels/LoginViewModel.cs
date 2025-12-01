@@ -4,11 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using Planora.ViewModels.Base;
 using Planora.ViewModels.Commands;
 using System.Diagnostics;
+using System.IO; 
+using System.Text.Json;
 
 namespace Planora.ViewModels.ViewModels
 {
   public class LoginViewModel : ViewModelBase
   {
+    public event Action<string>? OnLoginSuccess;
     private string _login = string.Empty;
     private string _password = string.Empty;
     private bool _rememberMe;
@@ -17,6 +20,7 @@ namespace Planora.ViewModels.ViewModels
     private int _failedAttempts;
     private DateTime? _lastFailedAttempt;
     private bool _isLocked;
+    private const string CredentialsPath = "credentials.json"; // Файл збереження
 
     public LoginViewModel()
     {
@@ -30,6 +34,7 @@ namespace Planora.ViewModels.ViewModels
           LoginCommand.RaiseCanExecuteChanged();
         }
       };
+      LoadSavedCredentials();
     }
 
     public string Login
@@ -118,6 +123,10 @@ namespace Planora.ViewModels.ViewModels
           ErrorMessage = "Успішний вхід!";
           Debug.WriteLine($"Успішний вхід для користувача: {Login}");
 
+          SaveCredentials();
+
+          OnLoginSuccess?.Invoke(Login);
+
         }
         else
         {
@@ -139,6 +148,50 @@ namespace Planora.ViewModels.ViewModels
         IsLoading = false;
       }
     }
+
+    private void LoadSavedCredentials()
+        {
+            if (File.Exists(CredentialsPath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(CredentialsPath);
+                    var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                    if (data != null && data.ContainsKey("Login"))
+                    {
+                        Login = data["Login"];
+                        RememberMe = true;
+                        // Пароль зазвичай не зберігають у відкритому вигляді в JSON, 
+                        // але для прототипу можна, або залишити пустим, щоб юзер ввів тільки пароль.
+                        // Password = data["Password"]; 
+                    }
+                }
+                catch { /* Ігноруємо помилки читання файлу */ }
+            }
+        }
+
+        private void SaveCredentials()
+        {
+            try
+            {
+                if (RememberMe)
+                {
+                    var data = new Dictionary<string, string>
+                    {
+                        { "Login", Login },
+                        // { "Password", Password } // Краще не зберігати пароль у текстовому файлі
+                    };
+                    var json = JsonSerializer.Serialize(data);
+                    File.WriteAllText(CredentialsPath, json);
+                }
+                else
+                {
+                    // Якщо галочку зняли — видаляємо файл
+                    if (File.Exists(CredentialsPath)) File.Delete(CredentialsPath);
+                }
+            }
+            catch { /* Ігноруємо помилки */ }
+        }
 
     private void ExecuteReset(object parameter)
     {
@@ -181,9 +234,9 @@ namespace Planora.ViewModels.ViewModels
       // тестові
       var testUsers = new[]
       {
-                new { Login = "admin", Password = "Admin123" },
-                new { Login = "teacher", Password = "Teacher123" },
-                new { Login = "student", Password = "Student123" }
+                new { Login = "admin", Password = "Admin111" },
+                new { Login = "teacher", Password = "Teacher111" },
+                new { Login = "student", Password = "Student111" }
             };
 
       return testUsers.Any(u => u.Login == login && u.Password == password);

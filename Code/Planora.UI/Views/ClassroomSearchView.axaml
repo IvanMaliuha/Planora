@@ -1,0 +1,152 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             x:Class="Planora.Views.ClassroomSearchView"
+             x:DataType="vm:ClassroomSearchViewModel"
+             PointerPressed="OnBackgroundClicked">
+
+    <Grid Background="Transparent">
+        <Grid RowDefinitions="Auto, *">
+            
+            <StackPanel Grid.Row="0" Margin="0,0,0,20" Spacing="20">
+                <TextBlock Text="Find a Room" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#333"/>
+                
+                <Border Background="White" CornerRadius="12" BorderBrush="#333" BorderThickness="2" 
+                        HorizontalAlignment="Stretch" Margin="40,0" Padding="10,5"> 
+                    
+                    <Grid ColumnDefinitions="Auto, *">
+                        <PathIcon Grid.Column="0" Data="{StaticResource SearchIcon}" 
+                                  Width="16" Height="16" Margin="10,0,10,0" Foreground="Gray"/>
+                        
+                        <TextBox Grid.Column="1" 
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                                 KeyDown="OnSearchBoxKeyDown"
+                                 Watermark="Введіть номер аудиторії..." 
+                                 BorderThickness="0" Background="Transparent" 
+                                 VerticalAlignment="Center" FontSize="16"/>
+                    </Grid>
+                </Border>
+
+                <WrapPanel HorizontalAlignment="Center" Margin="40,0">
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,20,10">
+                        <TextBlock Text="Корпус:" VerticalAlignment="Center" Foreground="Gray"/>
+                        <ComboBox ItemsSource="{Binding Buildings}" SelectedItem="{Binding SelectedBuilding}" Width="120"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,20,10">
+                        <TextBlock Text="Тип:" VerticalAlignment="Center" Foreground="Gray"/>
+                        <ComboBox ItemsSource="{Binding ClassroomTypes}" SelectedItem="{Binding SelectedType}" Width="140"/>
+                    </StackPanel>
+
+                    <CheckBox IsChecked="{Binding HasComputers}" Content="Комп'ютери" Margin="0,0,15,0"/>
+                    <CheckBox IsChecked="{Binding HasProjector}" Content="Проектор"/>
+                </WrapPanel>
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding SearchResults}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel HorizontalAlignment="Center"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding $parent[UserControl].((vm:ClassroomSearchViewModel)DataContext).OpenDetailCommand}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent" BorderThickness="0" Margin="10">
+                                <StackPanel Spacing="5">
+                                    
+                                    <Border Width="70" Height="70" 
+                                            CornerRadius="12" BorderBrush="#333" BorderThickness="2" Background="White">
+                                        <Panel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            
+                                            <PathIcon Data="{StaticResource ComputerIcon}" Width="32" Height="32" Foreground="#333">
+                                                <PathIcon.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="HasComputers"/>
+                                                        <Binding Path="IsFree"/>
+                                                    </MultiBinding>
+                                                </PathIcon.IsVisible>
+                                            </PathIcon>
+                                            
+                                            <PathIcon Data="{StaticResource ProjectorIcon}" Width="32" Height="32" Foreground="#333">
+                                                <PathIcon.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="HasProjector"/>
+                                                        <Binding Path="!HasComputers"/>
+                                                        <Binding Path="IsFree"/>
+                                                    </MultiBinding>
+                                                </PathIcon.IsVisible>
+                                            </PathIcon>
+
+                                            <StackPanel IsVisible="{Binding !IsFree}" Spacing="2">
+                                                <PathIcon Data="{StaticResource UsersIcon}" Width="28" Height="28" Foreground="#333"/>
+                                                <TextBlock Text="Busy" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+
+                                        </Panel>
+                                    </Border>
+                                    
+                                    <TextBlock Text="{Binding Number}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="#333"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <Grid IsVisible="{Binding SelectedClassroom, Converter={x:Static ObjectConverters.IsNotNull}}"
+              Background="#99000000">
+            <Border Background="White" CornerRadius="15" Width="320" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="25" BoxShadow="0 10 30 0 #50000000">
+                <StackPanel Spacing="15">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0" 
+                                   Text="{Binding SelectedClassroom.Number, StringFormat='Аудиторія {0}'}" 
+                                   FontSize="24" FontWeight="Bold"
+                                   TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                        
+                        <Button Grid.Column="1" Command="{Binding CloseDetailCommand}" 
+                                Content="✕" Background="Transparent" Foreground="Gray" 
+                                Padding="5" Margin="0,-5,-5,0"/>
+                    </Grid>
+                    
+                    <Border Height="1" Background="#EEE"/>
+                    
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding SelectedClassroom.Building, StringFormat='📍 {0}'}" FontSize="16"/>
+                        <TextBlock Text="{Binding SelectedClassroom.Type}" FontSize="16" Foreground="Gray"/>
+                        <TextBlock Text="{Binding SelectedClassroom.Capacity, StringFormat='Місць: {0}'}"/>
+                        
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                             <Border Background="#E0E7FF" CornerRadius="4" Padding="8,4" IsVisible="{Binding SelectedClassroom.HasComputers}">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <PathIcon Data="{StaticResource ComputerIcon}" Width="14" Height="14" Foreground="#3730A3"/>
+                                    <TextBlock Text="Комп'ютери" Foreground="#3730A3"/>
+                                </StackPanel>
+                            </Border>
+                             <Border Background="#FEF3C7" CornerRadius="4" Padding="8,4" IsVisible="{Binding SelectedClassroom.HasProjector}">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <PathIcon Data="{StaticResource ProjectorIcon}" Width="14" Height="14" Foreground="#B45309"/>
+                                    <TextBlock Text="Проектор" Foreground="#B45309"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <Border Background="#D1FAE5" CornerRadius="6" Padding="10" Margin="0,10,0,0" IsVisible="{Binding SelectedClassroom.IsFree}">
+                            <TextBlock Text="✅ Зараз вільно" Foreground="#065F46" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        </Border>
+                        
+                        <Border Background="#FEE2E2" CornerRadius="6" Padding="10" Margin="0,10,0,0" IsVisible="{Binding !SelectedClassroom.IsFree}">
+                            <TextBlock Text="⛔ Зараз йде пара" Foreground="#991B1B" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+                    
+                    <Button Command="{Binding CloseDetailCommand}" Content="Закрити" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

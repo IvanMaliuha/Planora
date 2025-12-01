@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             x:Class="Planora.Views.AdminDashboardView"
+             x:DataType="vm:AdminDashboardViewModel">
+
+    <Grid ColumnDefinitions="250, *">
+        
+        <Border Grid.Column="0" Background="#1F2937">
+            <Grid RowDefinitions="Auto, *, Auto">
+                
+                <StackPanel Grid.Row="0" Margin="20">
+                    <TextBlock Text="Planora" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <Border Background="#374151" CornerRadius="4" HorizontalAlignment="Left" Padding="6,2" Margin="0,5,0,0">
+                        <TextBlock Text="ADMIN PANEL" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Spacing="5" Margin="10">
+                    <StackPanel.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Foreground" Value="#D1D5DB"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property="Padding" Value="15,10"/>
+                            <Setter Property="FontSize" Value="15"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#374151"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Style>
+                    </StackPanel.Styles>
+
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Classrooms" Content="🏢  Аудиторії"/>
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Teachers" Content="👨‍🏫  Викладачі"/>
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Groups" Content="👥  Групи"/>
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Subjects" Content="📚  Предмети"/>
+                    
+                    <Separator Background="#374151" Margin="0,10"/>
+                    
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="Schedule" Content="⚡  Генерація розкладу" Foreground="#60A5FA"/>
+                </StackPanel>
+
+                <Border Grid.Row="2" Padding="20" BorderBrush="#374151" BorderThickness="0,1,0,0">
+                    <Button Command="{Binding LogoutCommand}" Content="🚪 Вийти" Foreground="#F87171"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto, *" Background="#F3F4F6">
+            <Border Grid.Row="0" Background="White" Height="60" Padding="20,0" BoxShadow="0 1 2 0 #05000000">
+                <TextBlock Text="Адміністрування" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="16"/>
+            </Border>
+
+            <TransitioningContentControl Grid.Row="1" Content="{Binding CurrentPage}" Padding="20"/>
+        </Grid>
+    </Grid>
+</UserControl>

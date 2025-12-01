@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Planora.ViewModels.ViewModels"
+             x:Class="Planora.Views.TeacherScheduleView"
+             x:DataType="vm:TeacherScheduleViewModel">
+    
+    <Grid RowDefinitions="Auto, *">
+        <!-- Шапка -->
+        <StackPanel Spacing="15" Margin="0,0,0,20">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Text="Мій розклад" FontSize="28" FontWeight="Bold"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Command="{Binding ToggleViewCommand}" 
+                            Content="Змінити вид (День/Тиждень)"
+                            Background="#E5E7EB" CornerRadius="6"/>
+                    <Button Command="{Binding TodayCommand}" 
+                            Content="Сьогодні"
+                            Background="#E5E7EB" CornerRadius="6"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                <Button Command="{Binding PreviousPeriodCommand}" Content="←" Padding="15,5" CornerRadius="6" Background="White" BorderBrush="#E5E7EB" BorderThickness="1"/>
+                <TextBlock Text="{Binding PeriodDisplay}" FontSize="18" VerticalAlignment="Center" Foreground="#4B5563" FontWeight="Medium"/>
+                <Button Command="{Binding NextPeriodCommand}" Content="→" Padding="15,5" CornerRadius="6" Background="White" BorderBrush="#E5E7EB" BorderThickness="1"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Список -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding GroupedScheduleItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,0,0,20">
+                            
+                            <!-- ЗАГОЛОВОК ДНЯ -->
+                            <Border BorderBrush="#E5E7EB" BorderThickness="0,0,0,2" Margin="0,0,0,10" Padding="0,0,0,5">
+                                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Foreground="#4F46E5"/>
+                            </Border>
+
+                            <!-- Пари -->
+                            <ItemsControl ItemsSource="{Binding Items}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="White" CornerRadius="8" Margin="0,0,0,10" Padding="15"
+                                                BorderBrush="#E5E7EB" BorderThickness="1" BoxShadow="0 1 3 0 #10000000">
+                                            <Grid ColumnDefinitions="*, Auto">
+                                                <StackPanel Grid.Column="0" Spacing="4">
+                                                    <TextBlock Text="{Binding Subject}" FontWeight="Bold" FontSize="16"/>
+                                                    
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <!-- 👇 ДЛЯ ВИКЛАДАЧА ГОЛОВНЕ - ГРУПА -->
+                                                        <TextBlock Text="{Binding Group, StringFormat='Група: {0}'}" FontSize="14" Foreground="#4B5563" FontWeight="SemiBold"/>
+                                                        
+                                                        <Border Background="#E0E7FF" CornerRadius="4" Padding="6,1">
+                                                            <TextBlock Text="{Binding Type}" Foreground="#4338CA" FontSize="11" FontWeight="SemiBold"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                    <TextBlock Text="{Binding Time}" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right"/>
+                                                    <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Right" Margin="0,5,0,0">
+                                                        <TextBlock Text="📍" FontSize="12"/> 
+                                                        <TextBlock Text="{Binding Classroom}" Foreground="Gray" FontSize="13"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
