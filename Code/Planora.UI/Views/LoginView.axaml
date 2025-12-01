@@ -7,23 +7,46 @@
              x:Class="Planora.Views.LoginView"
              x:DataType="vm:LoginViewModel">
 
+    <!-- 👇 ПОКРАЩЕНА АНІМАЦІЯ 👇 -->
+    <UserControl.Styles>
+        <Style Selector="Border.FadeIn">
+            <Style.Animations>
+                <!-- Тривалість: 1 секунда. Ефект: ElasticEaseOut (пружинистий) -->
+                <Animation Duration="0:0:1" Easing="CircularEaseOut"> 
+                    <KeyFrame KeyTime="0:0:0">
+                        <Setter Property="Opacity" Value="0.0"/>
+                        <Setter Property="TranslateTransform.Y" Value="50"/> <!-- Починаємо нижче на 50px -->
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.9"/> <!-- Трохи менший розмір -->
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.9"/>
+                    </KeyFrame>
+                    <KeyFrame KeyTime="0:0:1">
+                        <Setter Property="Opacity" Value="1.0"/>
+                        <Setter Property="TranslateTransform.Y" Value="0"/> <!-- Стаємо на місце -->
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.0"/> <!-- Нормальний розмір -->
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </UserControl.Styles>
+
     <Grid Background="#F3F4F6">
-        <Border Background="White" CornerRadius="12" BoxShadow="0 4 20 0 #20000000"
+        <!-- Використовуємо клас FadeIn -->
+        <Border Classes="FadeIn" 
+                Background="White" CornerRadius="12" BoxShadow="0 10 30 0 #20000000"
                 Margin="20" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center" Width="380">
+            
             <StackPanel Spacing="20">
                 <TextBlock Text="Planora" FontSize="28" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center"/>
                 
                 <StackPanel Spacing="8">
                     <TextBlock Text="Логін" FontWeight="Medium"/>
-                    <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" 
-                            Watermark="Ваш логін"/>
+                    <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" Watermark="Ваш логін"/>
                 </StackPanel>
 
                 <StackPanel Spacing="8">
                     <TextBlock Text="Пароль" FontWeight="Medium"/>
-                    <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" 
-                            PasswordChar="•" 
-                            Watermark="Ваш пароль"/>
+                    <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" PasswordChar="•" Watermark="Ваш пароль"/>
                 </StackPanel>
 
                 <Grid ColumnDefinitions="*,Auto">
