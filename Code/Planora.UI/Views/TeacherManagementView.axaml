@@ -52,14 +52,10 @@
 
                     <StackPanel>
                         <TextBlock Text="Посада"/>
-                        <ComboBox SelectedItem="{Binding NewTeacher.Position, UpdateSourceTrigger=PropertyChanged}" 
-                                  HorizontalAlignment="Stretch">
-                            <ComboBoxItem>Асистент</ComboBoxItem>
-                            <ComboBoxItem>Викладач</ComboBoxItem>
-                            <ComboBoxItem>Старший викладач</ComboBoxItem>
-                            <ComboBoxItem>Доцент</ComboBoxItem>
-                            <ComboBoxItem>Професор</ComboBoxItem>
-                        </ComboBox>
+                        <ComboBox ItemsSource="{Binding AvailablePositions}"
+                                SelectedItem="{Binding NewTeacher.Position}" 
+                                HorizontalAlignment="Stretch"
+                                PlaceholderText="Оберіть посаду..."/>
                     </StackPanel>
 
                     <StackPanel>

@@ -46,13 +46,10 @@
 
                     <StackPanel>
                         <TextBlock Text="Тип заняття (Лекція/Практика)"/>
-                        <ComboBox SelectedItem="{Binding NewSubject.Type, UpdateSourceTrigger=PropertyChanged}" 
-                                  HorizontalAlignment="Stretch">
-                            <ComboBoxItem>Лекція</ComboBoxItem>
-                            <ComboBoxItem>Практика</ComboBoxItem>
-                            <ComboBoxItem>Лабораторна</ComboBoxItem>
-                            <ComboBoxItem>Семінар</ComboBoxItem>
-                        </ComboBox>
+                        <ComboBox ItemsSource="{Binding AvailableSubjectTypes}"
+                                SelectedItem="{Binding NewSubject.Type}" 
+                                HorizontalAlignment="Stretch"
+                                PlaceholderText="Оберіть тип..."/>
                     </StackPanel>
 
                     <StackPanel>

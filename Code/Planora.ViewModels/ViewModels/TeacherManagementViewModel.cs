@@ -1,53 +1,95 @@
 using Planora.ViewModels.Base;
 using Planora.ViewModels.Commands;
 using System.Collections.ObjectModel;
+using System.Collections.Generic; 
 using System.Linq;
 using System;
+using Serilog; 
 
 namespace Planora.ViewModels.ViewModels
 {
     public class TeacherManagementViewModel : ViewModelBase
     {
         private string _searchText = string.Empty;
-        private TeacherItem _selectedTeacher;
+        private TeacherItem? _selectedTeacher;
         private bool _isEditMode;
+
+        public List<string> AvailablePositions { get; } = new List<string>
+        {
+            "Асистент",
+            "Викладач",
+            "Старший викладач",
+            "Доцент",
+            "Завідувач кафедри"
+        };
+
+        // Колекція викладачів
+        public ObservableCollection<TeacherItem> Teachers { get; set; }
+
+        // Об'єкт для створення/редагування
+        public TeacherItem NewTeacher { get; set; } = new TeacherItem();
 
         public TeacherManagementViewModel()
         {
-            // Тестові дані
+            Log.Debug("Відкрито сторінку управління викладачами.");
+
+
             Teachers = new ObservableCollection<TeacherItem>
             {
-                new TeacherItem { FullName = "Іванов Іван Іванович", Department = "Комп'ютерні науки", Position = "Професор", Email = "ivanov@univ.ua" },
-                new TeacherItem { FullName = "Петрова Марія Василівна", Department = "Математика", Position = "Доцент", Email = "petrova@univ.ua" },
-                new TeacherItem { FullName = "Сидоров Петро Петрович", Department = "ПЗ", Position = "Асистент", Email = "sydorov@univ.ua" }
+                new TeacherItem 
+                { 
+                    FullName = "Іванов Іван Іванович", 
+                    Department = "Комп'ютерні науки", 
+                    Position = "Професор", 
+                    Email = "ivanov@univ.ua" 
+                },
+                new TeacherItem 
+                { 
+                    FullName = "Петрова Марія Василівна", 
+                    Department = "Математика", 
+                    Position = "Доцент", 
+                    Email = "petrova@univ.ua" 
+                },
+                new TeacherItem 
+                { 
+                    FullName = "Сидоров Петро Петрович", 
+                    Department = "ПЗ", 
+                    Position = "Асистент", 
+                    Email = "sydorov@univ.ua" 
+                }
             };
+            Log.Debug("Завантажено {Count} викладачів із тестового джерела.", Teachers.Count);
 
-            // Команди
+            // Ініціалізація команд
             AddTeacherCommand = new RelayCommand(ExecuteAddTeacher);
             EditTeacherCommand = new RelayCommand(ExecuteEditTeacher, CanExecuteEditDelete);
             DeleteTeacherCommand = new RelayCommand(ExecuteDeleteTeacher, CanExecuteEditDelete);
-            SaveTeacherCommand = new RelayCommand(ExecuteSaveTeacher); // Завжди активна, щоб уникнути багів
+            SaveTeacherCommand = new RelayCommand(ExecuteSaveTeacher);
             CancelCommand = new RelayCommand(ExecuteCancel);
-
-            NewTeacher = new TeacherItem();
         }
 
-        public ObservableCollection<TeacherItem> Teachers { get; }
-
+        // Властивості
         public string SearchText
         {
             get => _searchText;
-            set { SetProperty(ref _searchText, value); /* Тут можна додати логіку фільтрації */ }
+            set
+            {
+                SetProperty(ref _searchText, value);
+                Log.Debug("Фільтрація списку за запитом: '{Query}'", value); 
+            }
         }
 
-        public TeacherItem SelectedTeacher
+        public TeacherItem? SelectedTeacher
         {
             get => _selectedTeacher;
-            set 
-            { 
+            set
+            {
                 SetProperty(ref _selectedTeacher, value);
                 EditTeacherCommand.RaiseCanExecuteChanged();
                 DeleteTeacherCommand.RaiseCanExecuteChanged();
+                
+                if (value != null)
+                    Log.Debug("Вибрано викладача: {Name}", value.FullName);
             }
         }
 
@@ -57,46 +99,48 @@ namespace Planora.ViewModels.ViewModels
             set => SetProperty(ref _isEditMode, value);
         }
 
-        // Об'єкт для редагування/створення
-        public TeacherItem NewTeacher { get; }
-
+        // Команди
         public RelayCommand AddTeacherCommand { get; }
         public RelayCommand EditTeacherCommand { get; }
         public RelayCommand DeleteTeacherCommand { get; }
         public RelayCommand SaveTeacherCommand { get; }
         public RelayCommand CancelCommand { get; }
 
-        private bool CanExecuteEditDelete(object parameter) => SelectedTeacher != null && !IsEditMode;
+        private bool CanExecuteEditDelete(object parameter) => SelectedTeacher != null;
+
+        // --- Реалізація команд ---
 
         private void ExecuteAddTeacher(object parameter)
         {
+            Log.Information("Користувач натиснув 'Додати викладача'. Відкриття форми.");
+            NewTeacher = new TeacherItem();
+            OnPropertyChanged(nameof(NewTeacher)); 
             IsEditMode = true;
-            SelectedTeacher = null; // Знімаємо виділення
-            
-            // Очищаємо форму
-            NewTeacher.FullName = string.Empty;
-            NewTeacher.Department = string.Empty;
-            NewTeacher.Position = string.Empty;
-            NewTeacher.Email = string.Empty;
+            SelectedTeacher = null;
         }
 
         private void ExecuteEditTeacher(object parameter)
         {
-            if (SelectedTeacher != null)
+            if (SelectedTeacher == null) return;
+
+            Log.Information("Користувач почав редагування викладача: {Name}", SelectedTeacher.FullName);
+            
+            NewTeacher = new TeacherItem
             {
-                IsEditMode = true;
-                // Копіюємо дані у форму
-                NewTeacher.FullName = SelectedTeacher.FullName;
-                NewTeacher.Department = SelectedTeacher.Department;
-                NewTeacher.Position = SelectedTeacher.Position;
-                NewTeacher.Email = SelectedTeacher.Email;
-            }
+                FullName = SelectedTeacher.FullName,
+                Department = SelectedTeacher.Department,
+                Position = SelectedTeacher.Position,
+                Email = SelectedTeacher.Email
+            };
+            OnPropertyChanged(nameof(NewTeacher));
+            IsEditMode = true;
         }
 
         private void ExecuteDeleteTeacher(object parameter)
         {
             if (SelectedTeacher != null)
             {
+                Log.Information("ВИДАЛЕННЯ: Користувач видалив викладача {Name} ({Email}).", SelectedTeacher.FullName, SelectedTeacher.Email);
                 Teachers.Remove(SelectedTeacher);
                 SelectedTeacher = null;
             }
@@ -104,37 +148,65 @@ namespace Planora.ViewModels.ViewModels
 
         private void ExecuteSaveTeacher(object parameter)
         {
-            // Якщо редагуємо існуючого
-            if (SelectedTeacher != null)
+            // Валідація: Ім'я не порожнє
+            if (string.IsNullOrWhiteSpace(NewTeacher.FullName))
             {
-                SelectedTeacher.FullName = NewTeacher.FullName;
-                SelectedTeacher.Department = NewTeacher.Department;
-                SelectedTeacher.Position = NewTeacher.Position;
-                SelectedTeacher.Email = NewTeacher.Email;
-            }
-            // Якщо створюємо нового
-            else
-            {
-                Teachers.Add(new TeacherItem
-                {
-                    FullName = NewTeacher.FullName,
-                    Department = NewTeacher.Department,
-                    Position = NewTeacher.Position,
-                    Email = NewTeacher.Email
-                });
+                Log.Warning("Невдала спроба збереження: Поле ПІБ порожнє.");
+                return;
             }
 
-            IsEditMode = false;
-            SelectedTeacher = null;
+            // Валідація: Посада обрана
+            if (string.IsNullOrWhiteSpace(NewTeacher.Position))
+            {
+                Log.Warning("Невдала спроба збереження: Посада не обрана.");
+                return;
+            }
+
+            try
+            {
+                if (SelectedTeacher != null)
+                {
+                    // Режим редагування
+                    Log.Information("Збереження змін для викладача: {OldName} -> {NewName}", SelectedTeacher.FullName, NewTeacher.FullName);
+                    
+                    SelectedTeacher.FullName = NewTeacher.FullName;
+                    SelectedTeacher.Department = NewTeacher.Department;
+                    SelectedTeacher.Position = NewTeacher.Position;
+                    SelectedTeacher.Email = NewTeacher.Email;
+                }
+                else
+                {
+                    // Режим додавання
+                    Log.Information("СТВОРЕНО НОВОГО ВИКЛАДАЧА: {Name}, Посада: {Pos}", NewTeacher.FullName, NewTeacher.Position);
+                    
+                    Teachers.Add(new TeacherItem
+                    {
+                        FullName = NewTeacher.FullName,
+                        Department = NewTeacher.Department,
+                        Position = NewTeacher.Position,
+                        Email = NewTeacher.Email
+                    });
+                }
+
+                IsEditMode = false;
+                SelectedTeacher = null;
+                Log.Information("Дані успішно збережено.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Критична помилка при збереженні викладача {Name}", NewTeacher.FullName);
+            }
         }
 
         private void ExecuteCancel(object parameter)
         {
+            Log.Information("Користувач скасував редагування/додавання.");
             IsEditMode = false;
             SelectedTeacher = null;
         }
     }
 
+    // Модель даних
     public class TeacherItem : ViewModelBase
     {
         private string _fullName = string.Empty;

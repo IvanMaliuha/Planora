@@ -4174,35 +4174,42 @@
     ]
   },
   "packageFolders": {
-    "/Users/maya/.nuget/packages/": {}
+    "C:\\Users\\7115\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj",
+      "projectUniqueName": "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\PlanoraConsoleApp\\PlanoraConsoleApp.csproj",
       "projectName": "PlanoraConsoleApp",
-      "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/PlanoraConsoleApp.csproj",
-      "packagesPath": "/Users/maya/.nuget/packages/",
-      "outputPath": "/Users/maya/Desktop/Planora/Planora-1/Code/PlanoraConsoleApp/obj/",
+      "projectPath": "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\PlanoraConsoleApp\\PlanoraConsoleApp.csproj",
+      "packagesPath": "C:\\Users\\7115\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\PlanoraConsoleApp\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/maya/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\7115\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj": {
-              "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.BLL/Planora.BLL.csproj"
+            "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\Planora.BLL\\Planora.BLL.csproj": {
+              "projectPath": "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\Planora.BLL\\Planora.BLL.csproj"
             },
-            "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj": {
-              "projectPath": "/Users/maya/Desktop/Planora/Planora-1/Code/Planora.DAL/Planora.DAL.csproj"
+            "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\Planora.DAL\\Planora.DAL.csproj": {
+              "projectPath": "C:\\Users\\7115\\Desktop\\Maksym\\Planora_Project\\Code\\Planora.DAL\\Planora.DAL.csproj"
             }
           }
         }
@@ -4266,7 +4273,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

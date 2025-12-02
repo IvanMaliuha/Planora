@@ -1,6 +1,8 @@
 using Planora.ViewModels.Base;
 using Planora.ViewModels.Commands;
-using System; // Для Action
+using System;
+using System.Windows.Input;
+using Serilog; // Логування
 
 namespace Planora.ViewModels.ViewModels
 {
@@ -10,18 +12,25 @@ namespace Planora.ViewModels.ViewModels
         private string _userName = "Іван Малюга";
         private string _userRole = "Студент";
 
-        // 👇 Подія виходу
         public event Action? OnLogout;
 
         public DashboardViewModel()
         {
-            // 👇 При натисканні кнопки викликаємо подію
-            LogoutCommand = new RelayCommand(_ => OnLogout?.Invoke());
+            Log.Debug("Ініціалізація DashboardViewModel. Завантаження головного меню...");
 
-            // 👇 Використовуємо нове ім'я класу (ScheduleViewModel)
-            CurrentPage = new ScheduleViewModel();
-            
+            // Кнопка виходу
+            LogoutCommand = new RelayCommand(_ => 
+            {
+                Log.Information("Користувач натиснув 'Вийти'. Завершення сесії.");
+                OnLogout?.Invoke();
+            });
+
+            // Навігація
             NavigateCommand = new RelayCommand(Navigate);
+
+            // Стартова сторінка
+            _currentPage = new ScheduleViewModel();
+            Log.Information("Завантажено стартову сторінку: Розклад.");
         }
 
         public string UserName
@@ -49,21 +58,24 @@ namespace Planora.ViewModels.ViewModels
         {
             if (parameter is string destination)
             {
+                Log.Information("Навігація: Користувач перейшов у розділ '{Section}'.", destination);
+
                 switch (destination)
                 {
                     case "Schedule":
-                        // 👇 Виправлене ім'я
-                        CurrentPage = new ScheduleViewModel(); 
+                        CurrentPage = new ScheduleViewModel();
                         break;
                     case "Classrooms":
                         CurrentPage = new ClassroomSearchViewModel();
                         break;
                     case "Teachers":
-                        CurrentPage = new TeacherTrackingViewModel(); 
+                        CurrentPage = new TeacherManagementViewModel(); 
                         break;
                     case "Profile":
-                        // 👇 Тепер це працює
-                        CurrentPage = new ProfileViewModel(); 
+                        CurrentPage = new ProfileViewModel();
+                        break;
+                    default:
+                        Log.Warning("Спроба переходу на невідому сторінку: {Destination}", destination);
                         break;
                 }
             }
