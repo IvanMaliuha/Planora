@@ -1,43 +1,90 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Planora.ViewModels.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="550"
              x:Class="Planora.Views.LoginView"
              x:DataType="vm:LoginViewModel">
 
-    <!-- 👇 ПОКРАЩЕНА АНІМАЦІЯ 👇 -->
     <UserControl.Styles>
         <Style Selector="Border.FadeIn">
             <Style.Animations>
-                <!-- Тривалість: 1 секунда. Ефект: ElasticEaseOut (пружинистий) -->
                 <Animation Duration="0:0:1" Easing="CircularEaseOut"> 
                     <KeyFrame KeyTime="0:0:0">
                         <Setter Property="Opacity" Value="0.0"/>
-                        <Setter Property="TranslateTransform.Y" Value="50"/> <!-- Починаємо нижче на 50px -->
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.9"/> <!-- Трохи менший розмір -->
+                        <Setter Property="TranslateTransform.Y" Value="50"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.9"/>
                         <Setter Property="ScaleTransform.ScaleY" Value="0.9"/>
                     </KeyFrame>
                     <KeyFrame KeyTime="0:0:1">
                         <Setter Property="Opacity" Value="1.0"/>
-                        <Setter Property="TranslateTransform.Y" Value="0"/> <!-- Стаємо на місце -->
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.0"/> <!-- Нормальний розмір -->
+                        <Setter Property="TranslateTransform.Y" Value="0"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
                         <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+        <Style Selector="Ellipse.WhiteFallingSnow">
+            <Style.Animations>
+                <Animation Duration="0:0:5" IterationCount="1" FillMode="Forward">
+                    <KeyFrame KeyTime="0:0:0">
+                        <Setter Property="TranslateTransform.Y" Value="-50"/>
+                    </KeyFrame>
+                    <KeyFrame KeyTime="0:0:5">
+                        <Setter Property="TranslateTransform.Y" Value="800"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+        <Style Selector="Ellipse.BlueFallingSnow">
+            <Style.Animations>
+                <Animation Duration="0:0:12" IterationCount="1" FillMode="Forward">
+                    <KeyFrame KeyTime="0:0:0">
+                        <Setter Property="TranslateTransform.Y" Value="-50"/>
+                    </KeyFrame>
+                    <KeyFrame KeyTime="0:0:12">
+                        <Setter Property="TranslateTransform.Y" Value="1000"/>
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
         </Style>
     </UserControl.Styles>
 
-    <Grid Background="#F3F4F6">
-        <!-- Використовуємо клас FadeIn -->
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                <GradientStop Color="#E0F2FE" Offset="0"/>
+                <GradientStop Color="#FFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Canvas x:Name="BackgroundSnowCanvas" IsHitTestVisible="False" />
+
+        <Canvas x:Name="DynamicSnowCanvas" IsHitTestVisible="False" ZIndex="5"/>
+
         <Border Classes="FadeIn" 
                 Background="White" CornerRadius="12" BoxShadow="0 10 30 0 #20000000"
-                Margin="20" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center" Width="380">
+                Margin="20" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center" Width="380"
+                ZIndex="10">
             
             <StackPanel Spacing="20">
-                <TextBlock Text="Planora" FontSize="28" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="-1">
+                    <Grid ClipToBounds="False">
+                        <TextBlock Text="P" FontSize="28" FontWeight="Bold" Foreground="#2563EB"/>
+                        <Canvas Width="30" Height="30" Margin="-12,-16,0,0" IsHitTestVisible="False">
+                            <Canvas.RenderTransform>
+                                <RotateTransform Angle="-15"/>
+                            </Canvas.RenderTransform>
+                            <Path Fill="#DC2626" Data="M 22,12 Q 22,2 4,5 L 2,9 Z" />
+                            <Border Width="14" Height="6" CornerRadius="3" Background="White"
+                                    Canvas.Top="10" Canvas.Left="8" BorderBrush="Black" BorderThickness="1"/>
+                            <Ellipse Width="8" Height="8" Fill="White"
+                                     Canvas.Left="-2" Canvas.Top="3" Stroke="Black" StrokeThickness="1"/>
+                        </Canvas>
+                    </Grid>
+                    <TextBlock Text="lanora" FontSize="28" FontWeight="Bold" Foreground="#2563EB"/>
+                </StackPanel>
                 
                 <StackPanel Spacing="8">
                     <TextBlock Text="Логін" FontWeight="Medium"/>
