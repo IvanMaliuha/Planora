@@ -5,26 +5,28 @@
              x:DataType="vm:TeacherTrackingViewModel">
 
     <Grid RowDefinitions="Auto, *">
+        <!-- ЗАГОЛОВОК -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20" Spacing="20">
             <TextBlock Text="Трекінг викладачів" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#333"/>
             
+            <!-- Пошук (з подією Enter, як ми робили раніше) -->
             <Border Background="White" CornerRadius="12" BorderBrush="#333" BorderThickness="2" 
                     HorizontalAlignment="Stretch" Margin="40,0" Padding="10,5">
-                
                 <Grid ColumnDefinitions="Auto, *">
                     <PathIcon Grid.Column="0" Data="{StaticResource SearchIcon}" 
                               Width="16" Height="16" Margin="10,0,10,0" Foreground="Gray"/>
                     
-                    <TextBox Grid.Column="1" 
+                    <TextBox Grid.Column="1"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                             KeyDown="OnSearchBoxKeyDown"
                              Watermark="Прізвище викладача..." 
                              BorderThickness="0" Background="Transparent" 
-                             VerticalAlignment="Center" FontSize="16"/>
+                             VerticalAlignment="Center" FontSize="16"
+                             KeyDown="OnSearchBoxKeyDown"/>
                 </Grid>
             </Border>
         </StackPanel>
 
+        <!-- СПИСОК ВИКЛАДАЧІВ -->
         <ScrollViewer Grid.Row="1" Margin="40,0">
             <ItemsControl ItemsSource="{Binding Teachers}">
                 <ItemsControl.ItemTemplate>
@@ -33,12 +35,14 @@
                                 BoxShadow="0 2 8 0 #15000000">
                             <Grid ColumnDefinitions="*, Auto">
                                 
+                                <!-- Інфо про викладача -->
                                 <StackPanel Grid.Column="0" Spacing="5">
                                     <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" Foreground="#1F2937"/>
                                     <TextBlock Text="{Binding Department, StringFormat='Кафедра: {0}'}" Foreground="Gray" FontSize="14"/>
                                     
                                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
                                         
+                                        <!-- Статус (Зелений/Червоний) -->
                                         <Panel>
                                             <Border Background="#D1FAE5" CornerRadius="4" Padding="8,2" IsVisible="{Binding !IsBusy}">
                                                 <TextBlock Text="{Binding CurrentStatus}" Foreground="#065F46" FontWeight="Bold" FontSize="12"/>
@@ -48,6 +52,7 @@
                                             </Border>
                                         </Panel>
                                         
+                                        <!-- Локація -->
                                         <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                             <TextBlock Text="📍" FontSize="14"/> 
                                             <TextBlock Text="{Binding Location}" FontWeight="Medium"/>
@@ -55,6 +60,7 @@
                                     </StackPanel>
                                 </StackPanel>
 
+                                <!-- Час -->
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                                     <TextBlock Text="Наступна зміна:" Foreground="Gray" FontSize="10" HorizontalAlignment="Right"/>
                                     <TextBlock Text="{Binding NextLessonTime}" FontSize="20" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Right"/>
