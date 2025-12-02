@@ -37,7 +37,7 @@ namespace Planora.ViewModels.ViewModels
                         CurrentPage = new ClassroomManagementViewModel();
                         break;
                     case "Teachers":
-                        CurrentPage = new TeacherManagementViewModel();
+                        CurrentPage = new TeacherTrackingViewModel();
                         break;
                     case "Groups":
                         CurrentPage = new GroupManagementViewModel();
